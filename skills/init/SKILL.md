@@ -13,6 +13,10 @@ GitHub setting**: check and report.
 Use the `Read`, `Edit` and `Write` tools for every file. Run each shell command
 as its own plain call, with no pipes, `&&` or redirects.
 
+Claude Code asks the owner to approve each write under `.claude/`. That is
+expected. If a write is refused, list it in the report as not written and carry
+on; never route around the refusal through the shell.
+
 ## 0. Preconditions
 
 Run each, and stop with a report if any fails:

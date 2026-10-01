@@ -54,13 +54,42 @@ flow (OpenSpec `spec-driven` schema + role subagents) for reuse across projects.
 - **A plugin skill cannot read the plugin's own files** under
   `permissions.blockReadsOutsideWorkingDirectories`: `Read` of
   `${CLAUDE_PLUGIN_ROOT}/…` is refused, and a `` !`cat …` `` injection fails the
-  whole skill. Measured with `--plugin-dir`; re-test with a marketplace install.
-  Consequence for the layout: **no `templates/` directory.** The overlay skeleton
+  whole skill. Measured with `--plugin-dir`. **From a marketplace install the
+  cache (`~/.claude/plugins/cache/agent-spec-flow/specflow/0.1.0/`) is
+  readable**, so the limit hits development and `--plugin-dir` users only.
+  Consequence for the layout, kept because inline works in both cases: **no
+  `templates/` directory.** The overlay skeleton
   and settings live inline in `skills/init/SKILL.md`, the `CLAUDE.md` block in
   `skills/sync/SKILL.md`, and `scripts/check-version.sh` keeps the repeated
   version honest. `LESSONS.md` § "Seen during extraction" logs this and the
   other deviations (`.gitignore` re-admits `.claude/specflow/` and
   `.claude/agents/`; `gh repo view` joins the base allowlist).
+
+### Step 2, on a fresh repo through the local marketplace (2026-10-01)
+
+Installed with `claude plugin install specflow@agent-spec-flow --scope local`
+into a scratch repo whose `origin` pointed at dialectica, for read-only `gh`
+answers only.
+
+- **Preload from the install:** a dispatched `specflow:closer` saw the first
+  heading of `flow`, `worktree-discipline` and `openspec-archive`, in order.
+- **`/specflow:init`:** passed its preconditions, wrote `.gitignore`, the block,
+  `openspec/`, `settings.json`, and the marketplace entry in
+  `settings.local.json` (directory source). It reported the GitHub checks
+  (protection ok, 0 required approvals, signing on) and changed nothing on
+  GitHub. **Writes under `.claude/` are approval-gated by Claude Code even in
+  acceptEdits mode** ("sensitive file"); in an interactive owner run that is a
+  prompt per file, which is the intended gate.
+- **`/specflow:run`:** refused with eight `TODO` headings listed; with the
+  overlay filled and the stamp set to `v0.0.9`, warned and continued.
+- **`/specflow:sync`:** moved the stamp `v0.0.9` → `v0.1.0`, left owner text
+  above and below the markers untouched.
+- **Isolation:** `specflow:design-reviewer` dispatched with
+  `isolation: "worktree"` landed in `.claude/worktrees/agent-<id>` on
+  `worktree-agent-<id>` at the dispatching session's HEAD.
+- **Not tested: a full piece** (dev-writer push, PR, CI, closer merge). It needs
+  a GitHub repo the flow may push to; that is dialectica's migration piece
+  (step 3) or a sandbox repo the owner creates.
 
 ## Layout
 

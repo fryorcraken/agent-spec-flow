@@ -482,8 +482,9 @@ Kept here until they become issues on this repository.
    `skills/init/SKILL.md` and the block inline in `skills/sync/SKILL.md`, not in
    `templates/`; and the version appears in the block stamp and in
    `skills/run/SKILL.md` as well as the manifests. `scripts/check-version.sh`
-   checks they agree. Re-test with a marketplace install; if the cache is
-   readable there, `templates/` can come back.
+   checks they agree. Re-tested 2026-10-01: a marketplace install's cache **is**
+   readable, so `templates/` could return for installed users, but
+   `--plugin-dir` development would then break. Kept inline.
 7. **`.gitignore` re-admits `.claude/specflow/`**, beyond decision 15's
    `settings.json`. The overlay must be tracked or no agent worktree has it.
    `.claude/agents/` is re-admitted too, for project roles.
