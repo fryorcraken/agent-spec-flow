@@ -1,0 +1,13 @@
+# OpenSpec's built-in workflow: proposal → specs → design → tasks.
+#
+# This repository specifies only the contracts that projects using specflow
+# depend on (DECISIONS.md, decision 18): the stage block, the findings format,
+# the branch names and the overlay headings. The rest of the plugin is prose
+# for agents and is reviewed as prose.
+schema: spec-driven
+
+context: |
+  specflow is a Claude Code plugin: role subagents and skills, written as
+  Markdown. A "consumer" is a project with specflow installed. A contract here
+  is a format a consumer's files, greps or agents rely on, so changing one is a
+  breaking change for every consumer.

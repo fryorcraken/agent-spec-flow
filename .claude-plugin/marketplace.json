@@ -1,0 +1,17 @@
+{
+  "name": "agent-spec-flow",
+  "owner": {
+    "name": "fryorcraken"
+  },
+  "metadata": {
+    "description": "The specflow plugin: a spec-driven multi-agent flow for Claude Code."
+  },
+  "plugins": [
+    {
+      "name": "specflow",
+      "source": "./",
+      "description": "Spec-driven multi-agent flow: OpenSpec plus role subagents, a runner and a project manager.",
+      "version": "0.1.0"
+    }
+  ]
+}

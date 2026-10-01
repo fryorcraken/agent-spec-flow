@@ -1,0 +1,5 @@
+# Agent scratch space.
+tmp/
+
+# Machine-local Claude Code settings.
+.claude/settings.local.json

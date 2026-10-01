@@ -1,0 +1,12 @@
+{
+  "name": "specflow",
+  "version": "0.1.0",
+  "description": "Spec-driven multi-agent flow for Claude Code: OpenSpec's spec-driven schema plus role subagents (spec-writer, dev-writer, tester, three reviewers, closer), a runner and a project manager.",
+  "author": {
+    "name": "fryorcraken"
+  },
+  "homepage": "https://github.com/fryorcraken/agent-spec-flow",
+  "repository": "https://github.com/fryorcraken/agent-spec-flow",
+  "license": "MIT OR Apache-2.0",
+  "keywords": ["openspec", "spec-driven", "subagents", "workflow", "review"]
+}
