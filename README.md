@@ -108,6 +108,17 @@ sh scripts/check-version.sh
 openspec validate --specs --strict
 ```
 
+To release, with a clean tree on `main` and the checks above passing, tag the
+commit `vX.Y.Z` and push the tag:
+
+```
+git tag -a vX.Y.Z -m "specflow vX.Y.Z"
+git push origin vX.Y.Z
+```
+
+Use `git tag`, not `claude plugin tag`, which can only write
+`specflow--vX.Y.Z`.
+
 The version is semver, set in `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json`. It is also repeated in the `CLAUDE.md` block
 stamp (`skills/sync/SKILL.md`) and in `skills/run/SKILL.md`, because skills
