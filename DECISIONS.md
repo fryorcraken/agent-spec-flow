@@ -34,7 +34,7 @@ flow (OpenSpec `spec-driven` schema + role subagents) for reuse across projects.
 | 17 | v0.1.0 | Faithful extraction: split generic from dialectica-specific, no behaviour or format changes, so dialectica's in-flight changes keep working. Log improvements seen during extraction for v0.2+. |
 | 18 | This repo's own process | PRs + one reviewer covering all four dimensions. OpenSpec specs only for the contracts consumers depend on: stage block, findings format, branch names, overlay headings. |
 | 19 | History | Fresh repo; the first commit cites dialectica `6a7e02b9`. |
-| 20 | Visibility and publication | Public repo, `fryorcraken/agent-spec-flow`, dual MIT / Apache-2.0 (owner, 2026-10-06). The owner had it created before dialectica completed a full piece on the plugin, to hold the v0.2 issues; this waives order-of-work step 4's gate for the repository only. **No release tag, and dialectica stays on its local marketplace, until a full piece has run on the plugin.** |
+| 20 | Visibility and publication | Public repo, `fryorcraken/agent-spec-flow`, dual MIT / Apache-2.0 (owner, 2026-10-06). The owner had it created before dialectica completed a full piece on the plugin, to hold the v0.2 issues; this waives order-of-work step 4's gate for the repository only. **No release tag, and dialectica stays on its local marketplace, until a full piece has run on the plugin.** `main` is protected (owner, 2026-10-08): PR required with 0 approvals, signed commits, `enforce_admins`, no force-push or deletion, no required status checks (this repo has no CI). Read `gh api repos/fryorcraken/agent-spec-flow/branches/main/protection` for the current state. |
 
 ## Plugin facts relied on (from docs, 2026-09-29)
 
