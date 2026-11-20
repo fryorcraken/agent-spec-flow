@@ -167,6 +167,12 @@ remember. `Monitor` is the fallback if `ListAgents` is genuinely absent.
 - **Cherry-pick before you dispatch the next writer.** The sequence per agent:
   hand-back → cherry-pick its commits onto `piece/<name>` → remove its tree →
   dispatch the next.
+- **After every hand-back that acted on findings, check the boxes yourself.**
+  Once its commits are cherry-picked, run
+  `grep -rn "^- \[ \]" openspec/changes/<name>/findings/` and compare the count
+  with the report. **A box the report calls ticked but the file shows as
+  `- [ ]` goes back to the same writer** by `SendMessage`, naming the file. Never
+  dispatch the `closer` on a report's word.
 
 ### How many at once
 

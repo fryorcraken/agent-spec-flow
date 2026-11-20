@@ -109,6 +109,19 @@ message that reads as a complaint about the marker rather than about the missing
 Forty findings, four of them high-severity defects, were written as headings.
 `grep -rn "^- \[ \]"` reported the directory clean, and they read as done.
 
+### A report that said ticked, with the box still open
+**Rule:** [A box is ticked when the file says `- [x]`](skills/flow/SKILL.md#the-findings-files), the writers' pre-report check, and [the runner's check after a hand-back](skills/run/SKILL.md#dispatching); issue #11
+
+In dialectica #179 a `dev-writer` pass fixed four findings and reported it had
+"fixed and ticked" them. Under two of the boxes it had written "**Fixed** in the
+commit that ticks this box", but after the runner cherry-picked the commit,
+`git grep -n "^- \[ \]"` still showed those two as `- [ ]`: the outcome text was
+written and the flip was not. A second pass was needed. Had the runner trusted
+the report, the `closer` would have been dispatched on unticked boxes, or a
+re-review asked to approve work whose record said otherwise. A writer that
+appends the outcome and misses the flip passes every check it runs itself, so
+the writer greps before reporting and the runner greps after.
+
 ### Findings relayed through a brief
 **Rule:** [Never relay a finding through a brief](skills/flow/SKILL.md#the-findings-files), and [A brief points at the work](skills/flow/SKILL.md#handing-over-between-agents)
 
