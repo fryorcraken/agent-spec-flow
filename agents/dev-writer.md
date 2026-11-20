@@ -109,14 +109,17 @@ before the runner dispatches reviewers. Do not wait for the runner's
 cherry-pick. The sequence, each as its own call:
 
 ```
-git config --get-regexp "^branch\.piece"
+git config --get-regexp "^branch\.piece/<name>\."
 git rev-parse --abbrev-ref HEAD
 git push origin HEAD:refs/heads/piece/<name>
 gh pr list --head piece/<name>
 gh pr create --head piece/<name> --base main
 ```
 
-- **The first command expects no output.** Anything else: stop and say so.
+- **The first command expects no output.** It checks that *this* piece's local
+  branch has no upstream, so a bare push cannot land on `main`. Any output
+  means stop and say so. Keep the pattern exact — `piece/<name>` followed by
+  `\.` — because a shorter one also matches other pieces' branches.
 - **`gh pr list --head piece/<name>` returning a row means the PR exists**:
   push to it, never open a second. On the findings pass it always exists.
 - **Never push `worktree-agent-<id>`.** Push the piece ref, never your own.

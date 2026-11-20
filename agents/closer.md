@@ -127,12 +127,15 @@ deletion**; the rest of the diff is the change folder moving into
 **Then push it**, each as its own call:
 
 ```
-git config --get-regexp "^branch\.piece"
+git config --get-regexp "^branch\.piece/<name>\."
 git push origin HEAD:refs/heads/piece/<name>
 ```
 
-- **The `git config` check expects no output.** `merge refs/heads/main` coming
-  back means the branch is configured to push to `main`: stop and say so.
+- **The `git config` check expects no output.** It checks that *this* piece's
+  local branch has no upstream. Any output, such as `merge refs/heads/main`,
+  means the branch is configured to push to `main`: stop and say so. Keep the
+  pattern exact — `piece/<name>` followed by `\.` — because a shorter one also
+  matches other pieces' branches.
 - **`HEAD` on the left.** The local `piece/<name>` does not carry your archive
   commit.
 - **This push happens before Step 4**, so the run you watch tests what you

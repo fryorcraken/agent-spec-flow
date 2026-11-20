@@ -59,7 +59,7 @@ worktree once its work is cherry-picked, and the reading below.
    ```
    git fetch origin
    git worktree add --no-track -b piece/<name> .claude/worktrees/piece-<name> origin/main
-   git config --get-regexp "^branch\.piece/<name>"
+   git config --get-regexp "^branch\.piece/<name>\."
    ```
 
    The last command must print nothing.
@@ -195,7 +195,7 @@ A full review is six dispatches, one per stage-block row:
 ## Worktrees
 
 Create the piece worktree with `--no-track`, as in "Start the piece". Check a
-branch with `git config --get-regexp "^branch\.<name>"`, which must print
+branch with `git config --get-regexp "^branch\.<name>\."`, which must print
 nothing; `git branch -vv` cannot tell. A `--no-track` branch is pushed by full
 refspec.
 
