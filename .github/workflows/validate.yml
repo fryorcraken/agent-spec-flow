@@ -1,0 +1,42 @@
+name: Validate
+
+# The plugin is Markdown, so the checks are structural: the manifests parse,
+# the version is the same everywhere it is written, and the contract specs
+# are valid. A rule in one file contradicting another is not something this
+# can see; the PR reviewer reads for that (DECISIONS.md, decision 22).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      # Pinned: a new CLI release can change what "valid" means. Bump
+      # deliberately, in a PR of its own.
+      - name: Install the CLIs
+        run: npm install --global @anthropic-ai/claude-code@2.1.329 @fission-ai/openspec@1.14.1
+
+      - name: Plugin manifest
+        run: claude plugin validate .claude-plugin/plugin.json
+
+      - name: Marketplace and components
+        run: claude plugin validate .
+
+      - name: Version is the same everywhere
+        run: sh scripts/check-version.sh
+
+      - name: Contract specs
+        run: openspec validate --specs --strict
