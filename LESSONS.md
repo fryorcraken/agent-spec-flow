@@ -449,10 +449,15 @@ with no prompt. Found reviewing a project set up with `/specflow:init`
 (basecamp-installer, PR 15), where a session applied branch protection with
 `gh api -X PUT` unprompted, under that rule, after the owner had asked for it.
 Allow rules cannot exclude flags, so the fix pairs `Bash(gh api *)` with deny
-rules on every flag that sets a method or a body; tested 2026-11-21 against a
-plain GET (runs) and `-X`, `-XGET`, `--method`, `-f`, `-F` and `--input` (all
-denied), and against `gh pr merge` and `gh pr close` (not allow-listed, so they
-prompt).
+rules on every flag that sets a method or a body. Tested 2026-11-21: a plain GET
+runs; `-X`, `-XGET`, `--method`, `--field`, `-f`, `-F` and `--input` are denied;
+`gh pr merge` and `gh pr close` are not allow-listed, so they prompt. **The first
+version of the deny rules leaked**: `-f ` and `-F ` ended in a space, so the
+attached form `-fper_page=1` (which pflag accepts, and which makes the call a
+POST) ran. An independent review caught it, and a rerun against the original
+rules confirmed it. The rules now match ` -f*` after a space and `-f*` right
+after `api`, so the attached form and the flag-first position are denied, while a
+branch name that merely contains `-f` (`fix-findings-tick`) still reads.
 
 ### Project skills, commands and hooks that no worktree had
 **Rule:** [Track skills, commands and hooks](skills/init/SKILL.md#2-gitignore), and the [`project-overlay` spec](openspec/specs/project-overlay/spec.md); issue #19

@@ -136,9 +136,10 @@ analyser, not Bash itself.
   or non-unique string, where `sed -i` exits 0 either way.
 - **`gh` is free until you filter it.** Run it plain and read the JSON; no
   `--jq`.
-- **`gh` writes prompt by design.** `gh api` with `-X`, `-f`, `-F` or `--input`,
-  `gh pr merge`, `close` and `comment`, and every `gh issue` write are not
-  allow-listed. Do not look for another way around the prompt.
+- **`gh` writes are refused or prompt by design.** `gh api` with a method or body
+  flag is refused. `gh pr merge`, `close` and `comment` and every `gh issue`
+  write prompt. `gh pr create`, `gh pr edit` and `gh run rerun` are allowed. Do
+  not look for another way around a refusal or a prompt.
 - **A long output is not a reason to pipe.** Run it plain and read the whole
   thing.
 - **`openspec` has no directory flag.** `cd <dir> && openspec …` with **no path

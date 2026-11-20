@@ -41,13 +41,14 @@ already has. Create it if absent. Afterwards it must carry:
 {
   "worktree": { "baseRef": "head" },
   "extraKnownMarketplaces": {
-    "agent-spec-flow": { "source": <see below> }
+    "agent-spec-flow": { "source": "<see below>" }
   },
   "enabledPlugins": { "specflow@agent-spec-flow": true },
   "permissions": {
     "allow": [
       "Bash(git *)",
       "Bash(gh repo view *)",
+      "Bash(gh release list *)",
       "Bash(gh issue view *)",
       "Bash(gh issue list *)",
       "Bash(gh pr view *)",
@@ -69,8 +70,10 @@ already has. Create it if absent. Afterwards it must carry:
     "deny": [
       "Bash(gh api *-X*)",
       "Bash(gh api *--method*)",
-      "Bash(gh api *-f *)",
-      "Bash(gh api *-F *)",
+      "Bash(gh api * -f*)",
+      "Bash(gh api -f*)",
+      "Bash(gh api * -F*)",
+      "Bash(gh api -F*)",
       "Bash(gh api *--field*)",
       "Bash(gh api *--raw-field*)",
       "Bash(gh api *--input*)"
@@ -83,11 +86,13 @@ already has. Create it if absent. Afterwards it must carry:
   `permissions.deny`, without duplicates. Add no stack commands; the owner adds
   those.
 - **The `gh` rules are read-only on purpose.** `gh api` runs only as a GET: the
-  deny rules refuse every flag that sets a method or a body. `gh pr create` and
-  `gh pr edit` are allowed because the `dev-writer` and the `closer` use them.
-  `gh pr merge`, `gh pr close`, `gh pr comment` and every `gh issue` write are
-  not allowed, so they prompt: that prompt is the owner's last gate. An owner
-  who authorises merge-on-green adds `Bash(gh pr merge *)` themself.
+  deny rules refuse every flag that sets a method or a body, including the
+  attached form (`-fkey=value`) and the flag-first position. `gh pr create` and
+  `gh pr edit` are allowed because the `dev-writer` and the `closer` use them,
+  and `gh run rerun` so the `closer` can retry a cancelled job. `gh pr merge`,
+  `gh pr close`, `gh pr comment` and every `gh issue` write are not allowed, so
+  they prompt: that prompt is the owner's last gate. An owner who authorises
+  merge-on-green adds `Bash(gh pr merge *)` themself.
 - **Report broader `gh` rules already present** — `Bash(gh pr *)`,
   `Bash(gh issue *)` or `Bash(gh run *)`, as an earlier init wrote — and leave
   them. The file is the owner's.

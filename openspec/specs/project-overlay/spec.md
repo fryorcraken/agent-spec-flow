@@ -8,7 +8,7 @@ Defines the project overlay, `.claude/specflow/PROJECT.md`: its location, its re
 
 ### Requirement: The overlay lives at a fixed, tracked path
 
-A consumer's overlay MUST be `.claude/specflow/PROJECT.md` at the repository root, tracked by git. `/specflow:init` MUST write `.gitignore` rules that track it while ignoring the rest of `.claude/` except `settings.json`, `agents/`, `skills/`, `commands/` and `hooks/`.
+A consumer's overlay MUST be `.claude/specflow/PROJECT.md` at the repository root, tracked by git. `/specflow:init` MUST write `.gitignore` rules that track it while ignoring the rest of `.claude/` except `settings.json`, `specflow/`, `agents/`, `skills/`, `commands/` and `hooks/`.
 
 #### Scenario: Every worktree has the overlay
 
