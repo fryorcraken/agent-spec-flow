@@ -82,7 +82,7 @@ You read exactly enough to decide the next dispatch:
 |---|---|
 | `openspec/changes/<name>/tasks.md` — the `## Stages` block | which stage is next, and whether anyone is on it |
 | `git ls-files openspec/changes/<name>/findings/` — **the filenames** | whether a reviewer has reported, and which dimension |
-| `grep -rn "^- \[ \]"` over `findings/` | whether anything is unanswered, as a count |
+| `grep -rc "^- \[ \]"` over `findings/` | whether anything is unanswered, as a count per file |
 | the `closer`'s report | whether the piece closed, or what stopped it |
 
 - **Do not read the findings themselves, and never quote one into a brief.**
@@ -165,14 +165,14 @@ remember. `Monitor` is the fallback if `ListAgents` is genuinely absent.
 - **Do not call `EnterWorktree` on an agent's behalf**, and do not put it in a
   brief.
 - **Cherry-pick before you dispatch the next writer.** The sequence per agent:
-  hand-back → cherry-pick its commits onto `piece/<name>` → remove its tree →
-  dispatch the next.
-- **After every hand-back that acted on findings, check the boxes yourself.**
-  Once its commits are cherry-picked, run
-  `grep -rn "^- \[ \]" openspec/changes/<name>/findings/` and compare the count
-  with the report. **A box the report calls ticked but the file shows as
-  `- [ ]` goes back to the same writer** by `SendMessage`, naming the file. Never
-  dispatch the `closer` on a report's word.
+  hand-back → cherry-pick its commits onto `piece/<name>` → check the boxes
+  (next bullet) → remove its tree → dispatch the next.
+- **After every hand-back that acted on findings, check the boxes yourself,
+  before you remove its tree.** Once its commits are cherry-picked, run
+  `grep -c "^- \[ \]" <file>…` over the findings files the report names, and
+  compare each count with the report's. **A box the report calls ticked but the
+  file shows as `- [ ]` goes back to the same writer** by `SendMessage`, naming
+  the file. Never dispatch the `closer` on a report's word.
 
 ### How many at once
 

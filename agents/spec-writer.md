@@ -142,7 +142,9 @@ On either pass you write the proposal and the spec, and nothing else — not
 code, not tests, not `design.md`.
 
 **When you act on a finding addressed to you**, flip its box to `- [x]` and
-append the outcome (`specflow:flow`, "The findings files"). A box is ticked only
-when the file says `- [x]`, whatever outcome text is written under it. **Before
-you report, run `git grep -n "^- \[ \]"` over each findings file you acted on**,
-and list in your report every box still unticked, with the reason.
+append the outcome (`specflow:flow`, "The findings files"). A box you cannot
+answer stays open: say so in your report, and never tick it to clear the list. A
+box is ticked only when the file says `- [x]`, whatever outcome text is written
+under it. **Before you report, run `git grep -c "^- \[ \]"` over each findings
+file you acted on.** Report the count per file, and list every unticked box
+addressed to you, with the reason.
