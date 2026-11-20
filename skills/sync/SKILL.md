@@ -118,9 +118,12 @@ analyser, not Bash itself.
   reaching **outside** the tree you are standing in.
 - **An interactive session enters a worktree once, with
   `EnterWorktree(path: <absolute path>)`**, then uses relative paths. Pass
-  `path`, never `name`: `name` creates a new worktree branched from
-  `origin/main`. **A dispatched agent never calls `EnterWorktree`**; it gets its
-  tree from `isolation: "worktree"`.
+  `path`, never `name`: `name` creates a *new* worktree, branched from
+  `origin/main` by default or from the current `HEAD` under
+  `worktree.baseRef: "head"`, which specflow requires. `HEAD` can be a stale
+  piece branch, so a `name` worktree can start from the wrong base while you
+  believe it is `origin/main`. **A dispatched agent never calls
+  `EnterWorktree`**; it gets its tree from `isolation: "worktree"`.
 - **Before sending an agent to a directory, check the directory is in scope.**
   An agent pointed outside every working directory stalls on every read.
 - **When you forbid a tool, name the replacement**: `Read` with
