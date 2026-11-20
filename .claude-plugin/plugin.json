@@ -1,6 +1,6 @@
 {
   "name": "specflow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Spec-driven multi-agent flow for Claude Code: OpenSpec's spec-driven schema plus role subagents (spec-writer, dev-writer, tester, three reviewers, closer), a runner and a project manager.",
   "author": {
     "name": "fryorcraken"
