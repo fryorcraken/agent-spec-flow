@@ -388,6 +388,18 @@ the scarcest thing in the flow, while producing nothing.
 A reviewer sent to check the runner file could not see them and reported them as
 missing — a fact about who dispatched it, not an error.
 
+### A runner re-invoked after the merge
+**Rule:** [Check whether the piece is finished](skills/run/SKILL.md#start-the-piece), issue #7
+
+In dialectica #177 the runner schedules wakeups that re-enter `/specflow:run`,
+and the owner can invoke it again. After the piece merged and its issue closed,
+the skill was re-invoked twice more. Each time the whole text reloaded, starting
+with "Start the piece", and the one thing between the runner and a second
+worktree plus a `spec-writer` for a closed issue was a `gh pr list --state open`
+that printed nothing about the piece and read like "no PR yet". A runner reading
+top to bottom could reasonably have started over; the guard that stopped it was a
+check the skill never mentioned.
+
 ### Changes with no stage block
 **Rule:** [A change with no stage block is untracked, not done](skills/run/SKILL.md#rebuild-the-state-before-you-act-on-it)
 
