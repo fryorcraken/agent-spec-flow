@@ -80,7 +80,7 @@ arrival-check commands.
 ## Committing and reporting
 
 - **Before any git write, check the branch you are on has no upstream**:
-  `git config --get-regexp "^branch\.<your-branch>"` prints nothing. If it
+  `git config --get-regexp "^branch\.<your-branch>\."` prints nothing. If it
   prints a `merge` line, stop and say so.
 - **Commit to your own branch**, the `worktree-agent-<id>` you are on.
 - **Commit named paths. Never `git add -A`.**
@@ -95,14 +95,18 @@ and git refuses (`fatal: 'piece/<name>' is already used by worktree at …`). Pu
 your tip to the remote piece ref by refspec instead:
 
 ```
-git config --get-regexp "^branch\.piece"
+git config --get-regexp "^branch\.piece/<name>\."
 git rev-parse --abbrev-ref HEAD
 git push origin HEAD:refs/heads/piece/<name>
 ```
 
 - **The `git config` check expects no output.** The piece branch is created with
-  `git worktree add --no-track`, so it has no upstream. `merge refs/heads/main`
-  coming back means it is configured to push to `main`: stop and say so.
+  `git worktree add --no-track`, so it has no upstream. Any output, such as
+  `merge refs/heads/main`, means it is configured to push to `main`: stop and
+  say so.
+- **Keep the pattern exact: `piece/<name>` followed by `\.`.** Branch config is
+  shared by every worktree, so a shorter pattern also matches other pieces'
+  branches and always prints output.
 - **`git branch -vv` is not the check.** It prints `[origin/main]` either way.
 - **`HEAD` on the left**, never `piece/<name>`: the local piece ref is the
   runner's and does not carry your commits.

@@ -13,7 +13,12 @@ Each piece MUST have exactly one task branch, named `piece/<name>`, where `<name
 #### Scenario: The piece branch has no upstream
 
 - **WHEN** the runner creates the piece worktree
-- **THEN** `git config --get-regexp "^branch\.piece/<name>"` prints nothing
+- **THEN** `git config --get-regexp "^branch\.piece/<name>\."` prints nothing
+
+#### Scenario: Another piece's upstream does not affect the check
+
+- **WHEN** a different local branch `piece/<other>` has an upstream
+- **THEN** `git config --get-regexp "^branch\.piece/<name>\."` still prints nothing
 
 ### Requirement: Only the piece branch reaches the remote
 
