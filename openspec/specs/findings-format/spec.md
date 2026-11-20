@@ -8,7 +8,12 @@ Defines the reviewers' findings files: where they live, how each finding is writ
 
 ### Requirement: One findings file per reviewer dimension
 
-Each reviewer MUST write its findings to `openspec/changes/<name>/findings/<dimension>.md`, where `<dimension>` is one of `correctness`, `security`, `readability`, `architecture`, `spec-test` or `design-review`. A reviewer MUST write only its own file.
+Each reviewer MUST write its findings to `openspec/changes/<name>/findings/<dimension>.md`, where `<dimension>` is one of `correctness`, `security`, `readability`, `architecture`, `spec-test` or `design-review`. A reviewer MUST write only its own file; a `code-reviewer` instance given more than one dimension MUST write one file per dimension it was given. A reviewer MUST write its file even when it has no findings, including the `design-reviewer` for a change with no `design.md`.
+
+#### Scenario: A multi-dimension code reviewer
+
+- **WHEN** one `code-reviewer` instance is given correctness and security
+- **THEN** it writes `findings/correctness.md` and `findings/security.md`, and no other file
 
 #### Scenario: The design reviewer's file
 

@@ -102,18 +102,25 @@ Write your findings to `openspec/changes/<name>/findings/<your-dimension>.md`,
 - **Lead with who it is for** (`spec-writer`, `dev-writer` or `tester`), then
   `file:line`, what is wrong, a concrete failure scenario, severity, and the
   measurement where you have one.
-- **One box per thing that must happen.** Never bundle two defects into one
-  entry, and never open a box for an observation nobody needs to act on.
+- **One box per thing that must happen**, except the verdict box below. Never
+  bundle two defects into one entry, and never open a box for an observation
+  nobody needs to act on.
 - **Separate genuine defects from stylistic preferences**, and say which is
   which.
 - **Say which areas were clean, in prose**, not as boxes.
-- **A file with no findings ends with one ticked verdict box**, so the
-  `closer`'s gate can see it: `- [x] **none** — no findings; clean areas
-  described above`. A file with findings carries no verdict box.
+- **A file with no findings ends with one ticked verdict box**, on one unwrapped
+  line, below the prose naming the areas you reviewed:
 
-**Then commit that one file** on the branch you are on, and **in the same commit
-tick the one stage row that names your dimension** — yours is the only
-`code-reviewer` row you may touch.
+  ```markdown
+  - [x] **none** — no findings; clean areas described above
+  ```
+
+  A file with findings carries no verdict box.
+
+**Then commit your findings file** (every file, if you covered more than one
+dimension) on the branch you are on, and **in the same commit tick the stage row
+for each dimension you covered** — those are the only `code-reviewer` rows you
+may touch.
 
 - **Push nothing.**
 - **Commit your findings file by name. Never `git add -A`**: your tree holds
