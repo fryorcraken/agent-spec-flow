@@ -195,7 +195,8 @@ A full review is six dispatches, one per stage-block row:
 ## Worktrees
 
 Create the piece worktree with `--no-track`, as in "Start the piece". Check a
-branch with `git config --get-regexp "^branch\.<name>\."`, which must print
+branch with `git config --get-regexp "^branch\.<branch>\."` (`<branch>` is the
+full branch name, `piece/<name>` for a piece), which must print
 nothing; `git branch -vv` cannot tell. A `--no-track` branch is pushed by full
 refspec.
 
