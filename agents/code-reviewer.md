@@ -107,6 +107,9 @@ Write your findings to `openspec/changes/<name>/findings/<your-dimension>.md`,
 - **Separate genuine defects from stylistic preferences**, and say which is
   which.
 - **Say which areas were clean, in prose**, not as boxes.
+- **A file with no findings ends with one ticked verdict box**, so the
+  `closer`'s gate can see it: `- [x] **none** — no findings; clean areas
+  described above`. A file with findings carries no verdict box.
 
 **Then commit that one file** on the branch you are on, and **in the same commit
 tick the one stage row that names your dimension** — yours is the only
