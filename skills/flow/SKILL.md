@@ -231,6 +231,11 @@ what Bash costs" — before its first shell command. Most often broken:
 - **A long output is not a reason to pipe.** Run it plain and read the whole
   thing.
 - **`gh` is free until you filter it.** No `--jq`; read the JSON.
+- **Never poll a background command's output** — `Monitor`, an `until` or
+  `while` loop, or `tail` on the harness's task output file. That file is
+  outside the working directories, so the read prompts, and an agent waiting on
+  a prompt cannot read the runner's messages. Run the long command in the
+  foreground within a time limit, or abandon it and say how far it got.
 - **`<producer> | grep -q` exits 141** when `grep -q` closes the pipe early and
   the producer dies of SIGPIPE. Use `[ "$(… | grep -c …)" -gt 0 ]`, which
   consumes all the output.

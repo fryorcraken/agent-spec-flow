@@ -381,6 +381,25 @@ the scarcest thing in the flow, while producing nothing.
 
 ## The runner — `skills/run/SKILL.md`
 
+### Agents stalling on a prompt nobody could see
+**Rule:** [Never poll a background command's output](skills/flow/SKILL.md#bash-costs), [the shell-rules paragraph in every brief](skills/run/SKILL.md#dispatching), and [a silent agent may be waiting on a prompt](skills/run/SKILL.md#is-an-agent-still-working); issue #14
+
+In dialectica #199 a `code-reviewer` started a mutation run in the background,
+then called `Monitor` with an `until grep -q … /tmp/…/tasks/<id>.output` loop.
+The project blocks reads outside the working directories, so the loop raised a
+prompt the agent sat on. Its five sibling reviewers took two to seventeen
+minutes; it took about forty-two, and only after the owner saw the prompt and
+declined it. The runner's message to stop was read only afterwards, because
+queued messages arrive at an agent's next tool round. A `dev-writer` also showed
+`running` with no commit and no reply to two status messages for forty-three
+minutes, then for about nine hours across a night; whether that was a prompt or a
+long run, the runner could not tell. v0.1.0's Bash rules covered `cd &&`, pipes,
+`gh --jq` and `grep -q` exit 141, but not `Monitor`, `until` loops or the
+harness's task output file, which are the natural thing to reach for while a long
+command runs; and the brief template carried no shell rules, so each runner had
+to remember to add them. One runner added them to the writers' briefs and
+forgot the six reviewers'.
+
 ### A reviewer reporting `ListAgents` missing
 **Rule:** [preflight 5](skills/run/SKILL.md#before-anything-preflight)
 
