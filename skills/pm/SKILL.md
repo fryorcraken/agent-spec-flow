@@ -81,6 +81,11 @@ present, holds this project's standing product policies.
      condition-based deadline goes in the milestone nearest where that
      condition is likely to land.
 
+**GitHub writes prompt, or are refused.** Creating or editing a milestone is a
+`gh api` write, which the allowlist refuses; the owner makes that change, or runs
+the command themself. `gh issue create`, `edit` and `comment` prompt: this role
+is owner-invoked and interactive, so ask for the approval and wait.
+
 ## Recording who is working an issue
 
 - **When an issue is known to be picked up** — on request, or seen through a PR
