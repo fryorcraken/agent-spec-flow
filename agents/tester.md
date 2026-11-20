@@ -64,6 +64,9 @@ instruction in the test not to update it to match.
 
 - **Test code is yours, including what the dev wrote. Implementation code is
   not:** change it only to mutate, and restore it after each mutation.
+- **Commit your tests before you mutate**, so a mutation or a half-restored file
+  can never be the only copy of your work. A mutation tool that edits files in
+  place needs this most; keep to the overlay's `## Mutation tool` time budget.
 - **Prove the implementation is untouched before you commit**, with
   `git diff --stat` against the commit you started from. It shows test files
   only, or you do not commit.
