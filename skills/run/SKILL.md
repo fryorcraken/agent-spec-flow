@@ -33,6 +33,22 @@ unless it says warn.
 5. **You are an interactive main-loop session.** `ListAgents` and
    `ScheduleWakeup` must be available to you. A subagent has neither and must
    not run a piece.
+6. **Signed commits.** Read the repository facts, then whether the default
+   branch requires signatures, each as its own call:
+
+   ```
+   gh repo view --json nameWithOwner,defaultBranchRef
+   gh api repos/<owner>/<repo>/branches/main/protection/required_signatures
+   ```
+
+   A 404 means the branch is unprotected, so signatures are not required.
+   `"enabled": true` means **every commit in the piece must be signed**:
+   - Run `git config --get commit.gpgsign`. If it does not print `true`, tell
+     the owner: every agent commit will be unsigned.
+   - **Tell the owner now to unlock their signing key**, so signing works without
+     a passphrase prompt for every agent and for the `closer`.
+   - Say that a commit that cannot be signed stops the run, and that no agent
+     works around it.
 
 ## What a runner does
 
@@ -215,7 +231,27 @@ refspec.
 
 Dispatch `specflow:closer` when every review row is ticked or struck. It
 rebases if behind, archives, watches CI and merges. It decides nothing and
-dispatches nobody. Two things come back:
+dispatches nobody.
+
+**Before you dispatch it, where signatures are required** (preflight 6),
+`git fetch origin` and list the commits GitHub will check, each as its own call:
+
+```
+git log --format="%G? %h %s" origin/main..origin/piece/<name>
+git log --format="%G? %h %s" origin/main..HEAD
+```
+
+- **Every line must start with `G`.** A line starting `N` is an unsigned commit.
+  **Do not dispatch the `closer`**: tell the owner which commits are unsigned and
+  ask whether to run the re-sign recovery.
+- **Any other letter**: read `gh api repos/<owner>/<repo>/commits/<sha>` and its
+  `verification.reason` before acting. A key GitHub knows can still verify when
+  the local keyring cannot.
+- **The re-sign recovery is a `closer` dispatch whose brief says the owner
+  authorised it**, as the `closer` agent describes. Never put that sentence in a
+  brief the owner did not authorise.
+
+Two things come back:
 
 **A red run.** Do not fix it yourself. Dispatch a fixer the ordinary way —
 `isolation: "worktree"`, its commits cherry-picked back. Nothing goes into the
