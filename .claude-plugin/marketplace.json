@@ -11,7 +11,7 @@
       "name": "specflow",
       "source": "./",
       "description": "Spec-driven multi-agent flow: OpenSpec plus role subagents, a runner and a project manager.",
-      "version": "0.1.0"
+      "version": "0.1.1"
     }
   ]
 }

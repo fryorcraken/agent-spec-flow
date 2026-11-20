@@ -37,7 +37,7 @@ Use the `Read` and `Edit`/`Write` tools for the file, never a shell redirect or
 Write exactly the text inside this fence, markers included:
 
 ````markdown
-<!-- specflow:begin v0.1.0 -->
+<!-- specflow:begin v0.1.1 -->
 ## specflow
 
 This repository runs the **specflow** plugin's spec-driven flow. This block is
