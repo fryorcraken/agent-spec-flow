@@ -388,6 +388,12 @@ the scarcest thing in the flow, while producing nothing.
 A reviewer sent to check the runner file could not see them and reported them as
 missing — a fact about who dispatched it, not an error.
 
+### Changes with no stage block
+**Rule:** [A change with no stage block is untracked, not done](skills/run/SKILL.md#rebuild-the-state-before-you-act-on-it)
+
+The unticked-row grep returns nothing on a change with no block, which reads
+exactly like every row ticked. Changes predating the rule answered `0`.
+
 ### An agent listed completed with its work unfinished
 **Rule:** [`completed` is not done](skills/run/SKILL.md#is-an-agent-still-working), [never end your turn with a command running](skills/worktree-discipline/SKILL.md#handing-the-tree-back), and the in-place mutation rule in [dev-writer](agents/dev-writer.md) and [tester](agents/tester.md); issue #13
 
@@ -402,12 +408,6 @@ list has no agent", read literally, said to dispatch the next stage. Removing th
 worktree would have destroyed the uncommitted rewrite. The runner resumed the
 agent with `SendMessage` and it finished. The overlay's "abandon a run past a
 couple of minutes" did not hold: agents ran mutations for five to eight.
-
-### Changes with no stage block
-**Rule:** [A change with no stage block is untracked, not done](skills/run/SKILL.md#rebuild-the-state-before-you-act-on-it)
-
-The unticked-row grep returns nothing on a change with no block, which reads
-exactly like every row ticked. Changes predating the rule answered `0`.
 
 ## The `CLAUDE.md` block — `skills/sync/SKILL.md`
 
