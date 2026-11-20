@@ -47,21 +47,53 @@ already has. Create it if absent. Afterwards it must carry:
   "permissions": {
     "allow": [
       "Bash(git *)",
-      "Bash(gh pr *)",
-      "Bash(gh run *)",
-      "Bash(gh issue *)",
-      "Bash(gh api *)",
       "Bash(gh repo view *)",
+      "Bash(gh issue view *)",
+      "Bash(gh issue list *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr list *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh pr checks *)",
+      "Bash(gh pr status *)",
+      "Bash(gh pr create *)",
+      "Bash(gh pr edit *)",
+      "Bash(gh run list *)",
+      "Bash(gh run view *)",
+      "Bash(gh run watch *)",
+      "Bash(gh run rerun *)",
+      "Bash(gh api *)",
       "Bash(openspec *)",
       "Bash(grep *)",
       "Bash(pwd)"
+    ],
+    "deny": [
+      "Bash(gh api *-X*)",
+      "Bash(gh api *--method*)",
+      "Bash(gh api *-f *)",
+      "Bash(gh api *-F *)",
+      "Bash(gh api *--field*)",
+      "Bash(gh api *--raw-field*)",
+      "Bash(gh api *--input*)"
     ]
   }
 }
 ```
 
-- **Allow rules are appended** to any existing `permissions.allow`, without
-  duplicates. Add no stack commands; the owner adds those.
+- **Allow and deny rules are appended** to any existing `permissions.allow` and
+  `permissions.deny`, without duplicates. Add no stack commands; the owner adds
+  those.
+- **The `gh` rules are read-only on purpose.** `gh api` runs only as a GET: the
+  deny rules refuse every flag that sets a method or a body. `gh pr create` and
+  `gh pr edit` are allowed because the `dev-writer` and the `closer` use them.
+  `gh pr merge`, `gh pr close`, `gh pr comment` and every `gh issue` write are
+  not allowed, so they prompt: that prompt is the owner's last gate. An owner
+  who authorises merge-on-green adds `Bash(gh pr merge *)` themself.
+- **Report broader `gh` rules already present** — `Bash(gh pr *)`,
+  `Bash(gh issue *)` or `Bash(gh run *)`, as an earlier init wrote — and leave
+  them. The file is the owner's.
+- **`Bash(git *)` is broad**: it covers `git push` and `git reset`. GitHub's
+  branch protection is the backstop for the default branch, which step 6
+  checks.
 - **The marketplace source** comes from `claude plugin marketplace list --json`,
   from the entry named `agent-spec-flow`:
   - `"source": "github"` → `{ "source": "github", "repo": "<its repo>" }` in
@@ -85,11 +117,17 @@ Ensure these lines are present, appending any that are missing under a comment
 !.claude/settings.json
 !.claude/specflow/
 !.claude/agents/
+!.claude/skills/
+!.claude/commands/
+!.claude/hooks/
 tmp/
 ```
 
-The overlay and project agents must be tracked so that every worktree has them.
-If an existing rule ignores `.claude/` itself (a `.claude/` or `.claude` line
+The overlay, project agents, skills, commands and hooks must be tracked so that
+every worktree has them: a dispatched worktree is cut from `HEAD`, and an
+untracked project skill is silently missing from it and from every fresh clone.
+Anything else under `.claude/` stays ignored; if the owner keeps another tracked
+directory there, they add its `!` line. If an existing rule ignores `.claude/` itself (a `.claude/` or `.claude` line
 rather than `.claude/*`), report it: git never re-includes a file whose parent
 directory is excluded, so the negations above would have no effect.
 
@@ -218,7 +256,8 @@ steps:
 
 1. Replace every `TODO` in `.claude/specflow/PROJECT.md`.
 2. Add the project's stack commands (test, build, lint, mutation) to
-   `permissions.allow` in `.claude/settings.json`.
+   `permissions.allow` in `.claude/settings.json`. Mutating `gh` calls prompt by
+   design; add `Bash(gh pr merge *)` only if you authorise merge-on-green.
 3. Review and commit `.claude/settings.json`, `.claude/specflow/PROJECT.md`,
    `.gitignore`, `CLAUDE.md` and `openspec/`.
 4. Restart the session, or run `/reload-plugins`, then run

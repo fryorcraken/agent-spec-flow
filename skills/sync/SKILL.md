@@ -103,7 +103,7 @@ analyser, not Bash itself.
 | a path the checker can resolve **before** the command runs | any path after `cd` |
 | `git diff origin/main -- <path>` to read an old version | materialising one to a scratch file first |
 | an allow-listed command — `git …`, `openspec …`, the project's own | the same with `--jq` or a pipe appended |
-| `gh api …`, `gh pr …`, `gh run …`, `gh issue …` | `sh <relative-path>` |
+| `gh` reads — `gh api <endpoint>`, `gh pr view/list/diff/checks`, `gh run list/view/watch`, `gh issue view/list` | `sh <relative-path>` |
 
 - **Never `cd <dir> && <command> <relative-path>`.** Use a path the checker can
   resolve against the cwd the command starts in:
@@ -136,6 +136,9 @@ analyser, not Bash itself.
   or non-unique string, where `sed -i` exits 0 either way.
 - **`gh` is free until you filter it.** Run it plain and read the JSON; no
   `--jq`.
+- **`gh` writes prompt by design.** `gh api` with `-X`, `-f`, `-F` or `--input`,
+  `gh pr merge`, `close` and `comment`, and every `gh issue` write are not
+  allow-listed. Do not look for another way around the prompt.
 - **A long output is not a reason to pipe.** Run it plain and read the whole
   thing.
 - **`openspec` has no directory flag.** `cd <dir> && openspec …` with **no path

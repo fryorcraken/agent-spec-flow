@@ -438,6 +438,32 @@ had to guess which scheme it used. Every stale checkout is a full copy of the
 repo, so a recursive grep hits each, and a citation from one reads like one from
 the real tree.
 
+### An allowlist that auto-approved GitHub writes
+**Rule:** [The `gh` rules are read-only on purpose](skills/init/SKILL.md#1-claudesettingsjson), and [`gh` writes prompt by design](skills/sync/SKILL.md#the-block); issue #17
+
+v0.1.0's `init` allowed `Bash(gh api *)` and `Bash(gh pr *)`. Neither is
+read-only: `gh api` accepts `-X PUT/PATCH/DELETE` (branch protection, repository
+settings) and `gh pr` covers merge and close. The overlay and the init skill both
+say specflow never changes a GitHub setting, but the allowlist would approve one
+with no prompt. Found reviewing a project set up with `/specflow:init`
+(basecamp-installer, PR 15), where a session applied branch protection with
+`gh api -X PUT` unprompted, under that rule, after the owner had asked for it.
+Allow rules cannot exclude flags, so the fix pairs `Bash(gh api *)` with deny
+rules on every flag that sets a method or a body; tested 2026-11-21 against a
+plain GET (runs) and `-X`, `-XGET`, `--method`, `-f`, `-F` and `--input` (all
+denied), and against `gh pr merge` and `gh pr close` (not allow-listed, so they
+prompt).
+
+### Project skills, commands and hooks that no worktree had
+**Rule:** [Track skills, commands and hooks](skills/init/SKILL.md#2-gitignore), and the [`project-overlay` spec](openspec/specs/project-overlay/spec.md); issue #19
+
+v0.1.0's `.gitignore` template ignored `.claude/*` and re-included only
+`settings.json`, `specflow/` and `agents/`, while the CLAUDE.md block describes
+project skills and hooks under `.claude/` as owner-managed content. An
+owner-approved project skill was therefore untracked, silently missing from every
+dispatched worktree (cut from `HEAD`) and from fresh clones, with no error: the
+same failure shape as the missing `baseRef`. Found in the same review.
+
 ## The project manager — `skills/pm/SKILL.md`
 
 ### PLAN.md
@@ -487,9 +513,11 @@ Kept here until they become issues on this repository.
    `--plugin-dir` development would then break. Kept inline.
 7. **`.gitignore` re-admits `.claude/specflow/`**, beyond decision 15's
    `settings.json`. The overlay must be tracked or no agent worktree has it.
-   `.claude/agents/` is re-admitted too, for project roles.
-8. **`Bash(gh repo view *)`** is in the base allowlist, beyond decision 15's list,
-   because every role derives the slug and default branch from it.
+   `.claude/agents/` is re-admitted too, for project roles, and since #19 so are
+   `skills/`, `commands/` and `hooks/`.
+8. **`Bash(gh repo view *)`** is in the base allowlist, beyond decision 15's
+   original list, because every role derives the slug and default branch from it.
+   Since #17 the `gh` rules are read-only forms (decision 15).
 9. **Not every harness build exposes `Grep` and `Glob` tools** (this extraction
    session had neither). The block's cost table names them as free.
 10. **The reviewer ceiling is six**, but `## Extra stages` can add reviewers.
