@@ -54,13 +54,15 @@ worktree once its work is cherry-picked, and the reading below.
 2. **Check whether the piece already exists, or has finished**, each as its own
    call: `gh issue view $ARGUMENTS --json state,closedByPullRequestsReferences`,
    then `gh pr view <number> --json state,mergedAt,headRefName` for each PR it
-   lists, `git worktree list`, `openspec list`.
-   - **A `MERGED` PR, or a `CLOSED` issue, means the piece is finished: report
-     that and stop.** Create no worktree and dispatch nothing.
+   lists (none is normal before the first `dev-writer` pass),
+   `gh pr list --state open`, `git worktree list`, `openspec list`.
+   - **A `MERGED` PR means the piece is finished: report that and stop.** Create
+     no worktree and dispatch nothing.
+   - **A `CLOSED` issue with no `MERGED` PR** — including a PR closed without
+     merging — **is the owner's decision.** Report it and ask; never start a
+     second piece over it.
    - **An existing `piece/<name>` or an open PR for this issue means resume
      it**, not start another.
-   - **A PR closed without merging is the owner's decision.** Report it and ask;
-     never start a second piece over it.
 3. **Create the piece worktree** from the default branch, `--no-track`:
 
    ```
@@ -107,10 +109,11 @@ gh issue view $ARGUMENTS --json state,closedByPullRequestsReferences
 gh pr view <number> --json state,mergedAt,headRefName
 ```
 
-**`MERGED`, or a closed issue, means the piece is finished: report that and
-stop.** Do not start the piece, do not dispatch, and schedule no further wakeup.
-`gh pr list --state open` prints nothing about a merged piece, which reads like
-"no PR yet". Otherwise run each as its own call:
+Run the second for each PR the first lists, and skip it when none is listed.
+**A `MERGED` PR means the piece is finished: report that and stop.** Do not start
+the piece, do not dispatch, and schedule no further wakeup. A closed issue with no
+`MERGED` PR is the owner's decision: report it and ask. `gh pr list --state open`
+prints nothing about a merged piece. Otherwise run each as its own call:
 
 ```
 gh pr list --state open
