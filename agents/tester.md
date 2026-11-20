@@ -93,6 +93,10 @@ instruction in the test not to update it to match.
   test.
 - **If a scenario is untestable as specified, report it as a spec defect.**
   Never write a test that cannot fail.
+- **A box is ticked only when the file says `- [x]`**, whatever outcome text is
+  written under it. **Before you report, run `git grep -n "^- \[ \]"` over each
+  findings file you acted on**, and list in your report every box still
+  unticked, with the reason.
 
 ## Committing and reporting
 

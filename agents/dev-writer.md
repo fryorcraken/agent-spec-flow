@@ -155,5 +155,9 @@ a rewrite.
 - **Do not edit the reviewer's text.** Append below it.
 - **A box you cannot answer stays open.** Say so in your report; never tick it
   to clear the list.
+- **A box is ticked only when the file says `- [x]`**, whatever outcome text is
+  written under it. **Before you report, run `git grep -n "^- \[ \]"` over each
+  findings file you acted on**, and list in your report every box still
+  unticked, with the reason.
 - **Move anything durable into `design.md`** before the tracker is deleted. A
   finding that records a decision belongs under Decisions.
