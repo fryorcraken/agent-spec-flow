@@ -96,6 +96,11 @@ afterwards was made by accident: report it.
   decision was not recorded" (a gap) from "an entry is thin" (a suggestion).
 - **One box per thing that must happen.** Say in prose if the decisions are in
   good shape rather than padding the list.
+- **A file with no findings ends with one ticked verdict box**, so the
+  `closer`'s gate can see it: `- [x] **none** — no findings; clean areas
+  described above`. A file with findings carries no verdict box.
+- **If the change has no `design.md`, still write the file**: one line saying
+  so, then the verdict box.
 
 **Then commit that one file** on the branch you are on, and **tick your own
 row** in `tasks.md`'s stage block in the same commit. **Push nothing.** Never

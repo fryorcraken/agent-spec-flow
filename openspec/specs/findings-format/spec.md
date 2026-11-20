@@ -31,6 +31,21 @@ A finding MUST NOT be written as a heading or as prose outside a checkbox.
 - **WHEN** a reviewer writes three findings
 - **THEN** `grep -c "^- \[ \]" findings/<dimension>.md` prints `3`
 
+### Requirement: A review with no findings carries one ticked verdict box
+
+A findings file with no findings MUST contain exactly one list item reading `- [x] **none** — no findings; clean areas described above`, preceded by prose naming the areas reviewed. A findings file with one or more findings MUST NOT contain it. The `closer` MUST treat a file whose only box is that item as answered.
+
+#### Scenario: A clean review passes the gate
+
+- **WHEN** a reviewer finds nothing and writes the verdict box
+- **THEN** `grep -c "^- \[ \]"` prints `0` and `grep -c "^- \["` prints `1` for the file
+- **AND** the `closer` does not stop on it
+
+#### Scenario: A clean review with no box
+
+- **WHEN** a reviewer finds nothing and writes only prose
+- **THEN** `grep -c "^- \["` prints `0` for the file and the `closer` stops and reports it
+
 ### Requirement: An outcome is appended, never edited in
 
 The agent acting on a finding MUST flip its box to `[x]` and append one of **Fixed** (with the commit and the test that fails without it), **Rejected** (with the argument) or **Deferred** (with where it now lives), below the reviewer's text. It MUST NOT edit the reviewer's text.

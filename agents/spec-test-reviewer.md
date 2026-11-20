@@ -122,6 +122,9 @@ checkbox**:
   where, what is wrong, a concrete failure scenario, and severity.
 - **One box per thing that must happen.** Never open one for an observation
   nobody needs to act on. Say which areas were clean in prose.
+- **A file with no findings ends with one ticked verdict box**, so the
+  `closer`'s gate can see it: `- [x] **none** — no findings; clean areas
+  described above`. A file with findings carries no verdict box.
 - **Report every mutation you ran and what happened.** A mutation that survived
   is the strongest finding you can write.
 
