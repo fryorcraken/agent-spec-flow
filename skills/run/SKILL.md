@@ -111,12 +111,22 @@ grep -c "^## Stages" openspec/changes/<name>/tasks.md
 
 ## Is an agent still working?
 
-**`ListAgents`.** A piece with no agent in that list has no agent, whatever you
-remember. `Monitor` is the fallback if `ListAgents` is genuinely absent.
+**`ListAgents`.** A piece with no agent in that list has no *running* agent,
+whatever you remember. That is not the same as a finished stage. `Monitor` is the
+fallback if `ListAgents` is genuinely absent.
 
 - **One is running → `SendMessage` it.** Never start a second writer with
   `Agent`.
-- **None running, row unticked → dispatch.**
+- **`completed` is not done.** An agent shows `completed` once its turn has
+  ended, including while it waits on its own background work; the harness then
+  says it "has not reported yet". **Only a hand-back — the agent's final report,
+  delivered to you — ends a stage.**
+- **`completed` with no hand-back, or with the stage's output missing** (no PR
+  after a `dev-writer`'s first pass, no findings file after a reviewer), **means
+  resume it** with `SendMessage`. Do not dispatch the next stage, and **do not
+  remove its worktree**: it may hold uncommitted work.
+- **No agent listed, every earlier hand-back received, row unticked →
+  dispatch.**
 - **Either way, set a 5–10 minute `ScheduleWakeup` or `Monitor`.** A dispatched
   agent is silent until it finishes.
 

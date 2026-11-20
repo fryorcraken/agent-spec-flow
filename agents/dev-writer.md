@@ -79,6 +79,9 @@ overlay's `## dev-writer` section where present.
 - **Pick the cheapest test layer that can actually see what you changed**, from
   the overlay's `## Test layers`. When none can, say so rather than letting a
   green suite stand in for coverage.
+- **Commit before you run a mutation tool that edits files in place**, or run it
+  on a copy, so the tree you leave never holds a half-restored file. The
+  overlay's `## Mutation tool` names the tool and its time budget; keep to it.
 - **Stop and say so if a task cannot be done as written.** Never quietly do
   something else.
 
