@@ -138,10 +138,10 @@ analyser, not Bash itself.
   `--jq`.
 - **A long output is not a reason to pipe.** Run it plain and read the whole
   thing.
-- **Never poll a background command's output** — `Monitor`, an `until` or
-  `while` loop, or `tail` on the harness's task output file, which sits outside
-  the working directories. Run the long command in the foreground within a time
-  limit, or abandon it and say how far it got.
+- **A dispatched agent never polls a background command's output** — with
+  `Monitor`, an `until` or `while` loop, or `tail` on the harness's task output
+  file. Run the long command in the foreground within a time limit, or abandon it
+  and say how far it got.
 - **`openspec` has no directory flag.** `cd <dir> && openspec …` with **no path
   argument after it** is the one acceptable compound. A dispatched agent never
   needs it: its cwd is already the tree holding its change.
