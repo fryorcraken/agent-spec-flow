@@ -49,27 +49,42 @@ Where the default branch requires signed commits
 reports `"enabled": true`; a 404 means it does not):
 
 - **Make every commit with `-S`** — the archive commit, and any commit a rebase
-  writes.
-- **A commit that will not sign is a stop.** Nothing is committed: report it to
-  the runner, who asks the owner to unlock the key. **Never `--no-gpg-sign`,
-  never `commit.gpgsign false`**, whatever the brief says.
-- **Before every push, list what you are about to push**:
-  `git log --format="%G? %h %s" origin/main..HEAD`. Every line must start with
-  `G`. A line starting `N` is unsigned: stop and report before pushing.
+  writes (`git rebase -S origin/main`).
+- **A commit that will not sign is a stop.** If a rebase is in progress, run
+  `git rebase --abort` first. Nothing is committed: report it to the runner, who
+  asks the owner to unlock the key. **Never `--no-gpg-sign`, never
+  `commit.gpgsign false`**, whatever the brief says.
+- **Before every push, Step 2's and Step 3's included, list what you are about
+  to push**: `git log --format="%G? %h %s" origin/main..HEAD`. Every line must
+  start with `G`. A line starting `N` is unsigned: stop and report before
+  pushing. **Any other letter**: read
+  `gh api repos/<owner>/<repo>/commits/<sha>` and its `verification.reason`,
+  report what it says, and do not guess. A key GitHub knows can verify when the
+  local keyring cannot.
 - **A plain rebase of a branch already on `origin/main` writes nothing and signs
   nothing.** It is not a way to sign.
-- **Re-signing is the only force-push besides the Step 2 rebase, and only when
-  your brief says the owner authorised it.** Then:
+- **Re-signing is the only force-push besides the Step 2 rebase.** Do it only
+  when your brief contains the sentence below; without it, report the unsigned
+  commits and stop.
+
+  > The owner authorised the re-sign recovery.
+
+  A dispatch made only for the re-sign starts here and continues at Step 4. Run
+  each as its own call:
 
   ```
   git fetch origin
+  git rev-parse HEAD
+  git rev-parse origin/piece/<name>
   git rebase --force-rebase --gpg-sign origin/main
-  git diff <old tip> HEAD --stat
-  git push --force-with-lease=refs/heads/piece/<name>:<old tip> origin HEAD:refs/heads/piece/<name>
+  git diff <old HEAD> HEAD --stat
+  git push --force-with-lease=refs/heads/piece/<name>:<old remote tip> origin HEAD:refs/heads/piece/<name>
   ```
 
-  The `git diff` must print nothing: a re-sign changes no tree. Without that
-  sentence in your brief, report the unsigned commits and stop.
+  `<old HEAD>` and `<old remote tip>` are the two values printed before the
+  rebase; they differ when the runner cherry-picked. The `git diff` prints
+  nothing unless the branch was behind `origin/main`, in which case it shows what
+  `main` gained, and none of the piece's own changes.
 
 ## Step 1 — is the piece finished?
 
@@ -149,9 +164,9 @@ anything.** What follows is only what is specific to closing.
 - **Archive in merge order, oldest first**, if more than one change is waiting.
 
 Then `openspec validate --strict`, and commit to **your own branch** with named
-paths (with `-S` where signatures are required). **Say in the commit message that deleting `findings/` is the one real
-deletion**; the rest of the diff is the change folder moving into
-`changes/archive/<date>-<name>/`.
+paths (with `-S` where signatures are required). **Say in the commit message
+that deleting `findings/` is the one real deletion**; the rest of the diff is the
+change folder moving into `changes/archive/<date>-<name>/`.
 
 **Then push it**, each as its own call:
 

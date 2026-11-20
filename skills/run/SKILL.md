@@ -41,14 +41,18 @@ unless it says warn.
    gh api repos/<owner>/<repo>/branches/main/protection/required_signatures
    ```
 
-   A 404 means the branch is unprotected, so signatures are not required.
-   `"enabled": true` means **every commit in the piece must be signed**:
-   - Run `git config --get commit.gpgsign`. If it does not print `true`, tell
-     the owner: every agent commit will be unsigned.
-   - **Tell the owner now to unlock their signing key**, so signing works without
-     a passphrase prompt for every agent and for the `closer`.
-   - Say that a commit that cannot be signed stops the run, and that no agent
-     works around it.
+   Put the default branch's name from `defaultBranchRef` in place of `main`.
+   - **`"enabled": false`, or a 404 (the branch is unprotected):** signatures are
+     not required, unless the owner says a ruleset requires them; this endpoint
+     does not show rulesets. **A 403:** you cannot read it, so ask the owner.
+   - **`"enabled": true` means every commit in the piece must be signed.**
+     - Run `git config --get commit.gpgsign`. **If it does not print `true`,
+       stop** and tell the owner to turn signing on: otherwise every agent
+       commit is unsigned.
+     - **Tell the owner now to unlock their signing key**, so signing works
+       without a passphrase prompt for every agent and for the `closer`.
+     - Say that a commit that cannot be signed stops the run, and that no agent
+       works around it.
 
 ## What a runner does
 
@@ -247,9 +251,9 @@ git log --format="%G? %h %s" origin/main..HEAD
 - **Any other letter**: read `gh api repos/<owner>/<repo>/commits/<sha>` and its
   `verification.reason` before acting. A key GitHub knows can still verify when
   the local keyring cannot.
-- **The re-sign recovery is a `closer` dispatch whose brief says the owner
-  authorised it**, as the `closer` agent describes. Never put that sentence in a
-  brief the owner did not authorise.
+- **The re-sign recovery is a `closer` dispatch whose brief contains the exact
+  sentence** `The owner authorised the re-sign recovery.` Put it there only on
+  the owner's say-so.
 
 Two things come back:
 

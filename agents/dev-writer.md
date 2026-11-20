@@ -119,6 +119,11 @@ gh pr create --head piece/<name> --base main
 - **The first command expects no output.** Anything else: stop and say so.
 - **`gh pr list --head piece/<name>` returning a row means the PR exists**:
   push to it, never open a second. On the findings pass it always exists.
+- **Where the default branch requires signed commits, list what you are about
+  to push** before the push: `git log --format="%G? %h %s" origin/main..HEAD`.
+  Every line must start with `G`; otherwise stop and report.
+- **Pass `--title` and `--body` to `gh pr create`**, so it never waits for
+  input. The body ends with `Closes #<n>`.
 - **Never push `worktree-agent-<id>`.** Push the piece ref, never your own.
 - **Never check out `piece/<name>`.**
 - **Open the PR early, because CI runs on the PR**, not on a push to a piece
