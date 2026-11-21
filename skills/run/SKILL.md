@@ -206,8 +206,11 @@ refspec.
   recovering a mutation an agent left uncommitted. `--force` destroys all of
   it.
 - **Run `git worktree list` at the end of each review round.** A tree with no
-  open PR and no running agent is prunable. `git worktree prune` clears entries
-  whose directories are gone.
+  open PR and no running agent is yours to remove, with
+  `git worktree remove <path>`.
+- **Remove only trees this flow created, each by path.** Never run a blanket
+  `git worktree prune`: it drops the registration of every worktree whose
+  directory is missing, including ones another tool manages.
 - **Check merged-ness with `gh pr list`, not `git branch --merged`.** Pieces are
   squash-merged.
 
