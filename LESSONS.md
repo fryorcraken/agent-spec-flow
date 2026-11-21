@@ -429,6 +429,16 @@ prompts in the mode meant not to interrupt.
 Agents told "no Python" reached for `awk`, `sed` or a pipeline and stalled on the
 prompt those cause.
 
+### A blanket prune in the runner's cleanup
+**Rule:** [Remove only trees this flow created, each by path](skills/run/SKILL.md#worktrees); issue #32
+
+v0.1.0's runner skill said `git worktree prune` clears entries whose directories
+are gone. A blanket prune drops the registration of every such worktree, not only
+the runner's own, including one another tool manages. Harmless in a plain clone;
+reported as breaking for a repository whose worktrees are managed by another tool
+(herdr), where a directory can be briefly absent. Every other cleanup rule in the
+plugin already used `git worktree remove <path>`.
+
 ### Worktrees under `tmp/`
 **Rule:** [Worktrees go in `.claude/worktrees/`](skills/sync/SKILL.md#the-block)
 
