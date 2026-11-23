@@ -67,9 +67,18 @@ worktree once its work is cherry-picked, and the reading below.
 1. **Read the issue**: `gh issue view $ARGUMENTS`. Pick `<name>`, a short
    kebab-case name for the change; the piece branch is `piece/<name>` and the
    OpenSpec change is `openspec/changes/<name>/`.
-2. **Check it is not already running**: `gh pr list --state open`,
-   `git worktree list`, `openspec list`. An existing `piece/<name>` or open PR
-   for this issue means resume it, not start another.
+2. **Check whether the piece already exists, or has finished**, each as its own
+   call: `gh issue view $ARGUMENTS --json state,closedByPullRequestsReferences`,
+   then `gh pr view <number> --json state,mergedAt,headRefName` for each PR it
+   lists (none is normal before the first `dev-writer` pass),
+   `gh pr list --state open`, `git worktree list`, `openspec list`.
+   - **A `MERGED` PR means the piece is finished: report that and stop.** Create
+     no worktree and dispatch nothing.
+   - **A `CLOSED` issue with no `MERGED` PR** — including a PR closed without
+     merging — **is the owner's decision.** Report it and ask; never start a
+     second piece over it.
+   - **An existing `piece/<name>` or an open PR for this issue means resume
+     it**, not start another.
 3. **Create the piece worktree** from the default branch, `--no-track`:
 
    ```
@@ -109,7 +118,18 @@ You read exactly enough to decide the next dispatch:
 ## Rebuild the state before you act on it
 
 Your memory of what you dispatched is not the source of truth. At the start of a
-session and after any gap, run each as its own call:
+session and after any gap, **first ask whether the piece is already finished**:
+
+```
+gh issue view $ARGUMENTS --json state,closedByPullRequestsReferences
+gh pr view <number> --json state,mergedAt,headRefName
+```
+
+Run the second for each PR the first lists, and skip it when none is listed.
+**A `MERGED` PR means the piece is finished: report that and stop.** Do not start
+the piece, do not dispatch, and schedule no further wakeup. A closed issue with no
+`MERGED` PR is the owner's decision: report it and ask. `gh pr list --state open`
+prints nothing about a merged piece. Otherwise run each as its own call:
 
 ```
 gh pr list --state open
@@ -277,6 +297,11 @@ it green.
 the finding names.
 
 A stale branch does not come back; the `closer` rebases it itself.
+
+**When the `closer` reports the PR merged, the piece is finished.** Check
+`gh pr view <number> --json state` rather than the report, tell the owner, and
+schedule no further wakeup. A later invocation for the same issue stops at "Start
+the piece".
 
 ## Lessons
 
