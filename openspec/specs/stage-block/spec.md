@@ -39,7 +39,7 @@ The `spec-writer` MUST write the block, unticked, before any other agent edits `
 
 ### Requirement: Each agent instance flips only its own row
 
-An agent MUST tick only the row naming its own stage and, for `code-reviewer`, its own dimension. Agents other than the `spec-writer` MUST NOT add a row, and an agent MUST NOT tick a row on another agent's behalf.
+An agent MUST tick only the row naming its own stage and, for `code-reviewer`, its own dimension, or each dimension it was given. Agents other than the `spec-writer` MUST NOT add a row, and an agent MUST NOT tick a row on another agent's behalf.
 
 #### Scenario: Four code-reviewer instances
 

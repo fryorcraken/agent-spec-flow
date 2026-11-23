@@ -131,6 +131,18 @@ Scanning for a reachable panic is a different reading of a file from scanning
 for a function doing two jobs. One agent holding both becomes whichever it
 started with.
 
+### Clean reviews the closer could not see
+**Rule:** [A review with no findings carries one box](skills/flow/SKILL.md#the-findings-files), issue #2
+
+v0.1.0's reviewers said to report clean areas "in prose, not as boxes", and the
+`closer` stopped on any findings file with zero boxes. A reviewer that found
+nothing and followed its own instructions wrote a file the gate always rejected.
+In dialectica it cost two extra reviewer dispatches (#173), each appending a
+`## Gate record` section with one ticked box, and once the `closer` merged anyway
+with four of six files box-less (#165), so the gate was not enforced. The gate
+exists because forty findings once read as done when written as headings, so it
+stays mechanical and the reviewers adapt: one ticked verdict box per clean file.
+
 ### The blind spec-test reviewer
 **Rule:** [`spec-test-reviewer` never reads the implementation](skills/flow/SKILL.md#the-roles)
 

@@ -105,6 +105,9 @@ grep -rc "^- \[" openspec/changes/<name>/findings/
 - **Every file must be non-zero in the second.** A file with zero boxes is a
   file the gate cannot see: report it to the runner, naming the file. Do not
   interpret it.
+- **A file whose only box is the ticked `none` verdict is a clean review**, not
+  a gap: accept it. **A `none` verdict beside any other box is an error**:
+  report the file to the runner.
 
 **The stage block** in `tasks.md`: every row ticked or struck through with a
 reason, except your own three. **Never tick a row on another agent's behalf.**
