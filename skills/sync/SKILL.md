@@ -175,7 +175,7 @@ analyser, not Bash itself.
 
   Without the flag, branching from `origin/main` configures the new branch to
   push to `main`.
-- **Check it with `git config --get-regexp "^branch\.<branch>"`, which returns
+- **Check it with `git config --get-regexp "^branch\.<branch>\."`, which returns
   nothing when the branch is right.** `git branch -vv` cannot tell: it prints
   `[origin/main]` either way.
 - **Push a `--no-track` branch by full refspec:**

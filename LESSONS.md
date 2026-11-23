@@ -274,6 +274,18 @@ branch was rejected by branch protection *for `refs/heads/main`*. `git branch
 -vv` printed `[origin/main]` in both the right and the wrong case, so it could
 not serve as the check.
 
+### A push gate that matched every piece
+**Rule:** [Keep the pattern exact](skills/worktree-discipline/SKILL.md#the-piece-push-dev-writer-and-closer-only), issue #3
+
+v0.1.0 told the `dev-writer` and `closer` to run `git config --get-regexp
+"^branch\.piece"` and expect no output. Branch config lives in the repository's
+shared `.git/config`, so the pattern matched every local piece branch that had an
+upstream. In dialectica the `dev-writer` ran it as written, got lines for older
+pieces and none for its own, and stopped without pushing or opening the PR; the
+runner had to resume it. The narrow form the runner already used,
+`^branch\.piece/<name>`, still prefix-matches `piece/<name>-v2`, so the fix ends
+the pattern with `\.`: git prints each key as `branch.<name>.merge`.
+
 ### Unsigned commits reaching the merge
 **Rule:** [Preflight 6](skills/run/SKILL.md#before-anything-preflight), [the `closer`'s "Signed commits"](agents/closer.md#signed-commits), and [a commit that will not sign does not stop you](skills/worktree-discipline/SKILL.md#committing-and-reporting); issues #4 and #8
 
