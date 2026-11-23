@@ -188,6 +188,9 @@ directory before merge, once no box is empty.
 
 - **An unticked entry blocks the merge.** `grep -rn "^- \[ \]"` over the
   directory either returns lines or it does not.
+- **A box is ticked when the file says `- [x]`**, whatever outcome text sits
+  under it. A writer's report that a finding is ticked is a claim; the `grep` is
+  the check.
 - **The gate only sees checkboxes.** Before trusting an empty result, check
   every file has boxes at all: `grep -rc "^- \[" findings/` must be non-zero for
   each one.
