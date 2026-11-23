@@ -122,6 +122,10 @@ gh pr create --head piece/<name> --base main
   `\.` — because a shorter one also matches other pieces' branches.
 - **`gh pr list --head piece/<name>` returning a row means the PR exists**:
   push to it, never open a second. On the findings pass it always exists.
+- **Push whether or not your commits are signed.** The `closer` signs the branch
+  before the merge.
+- **Pass `--title` and `--body` to `gh pr create`**, so it never waits for
+  input. The body ends with `Closes #<n>`.
 - **Never push `worktree-agent-<id>`.** Push the piece ref, never your own.
 - **Never check out `piece/<name>`.**
 - **Open the PR early, because CI runs on the PR**, not on a push to a piece

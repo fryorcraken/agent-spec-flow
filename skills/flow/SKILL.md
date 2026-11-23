@@ -191,6 +191,13 @@ directory before merge, once no box is empty.
 - **The gate only sees checkboxes.** Before trusting an empty result, check
   every file has boxes at all: `grep -rc "^- \[" findings/` must be non-zero for
   each one.
+- **A review with no findings still carries one box**, ticked, on one line:
+
+  ```markdown
+  - [x] **none** — no findings; clean areas described above
+  ```
+
+  A file with findings carries no such box.
 - **Findings stay attributable.** A fixer that disagrees argues with the
   reviewer the entry names.
 - **Never relay a finding through a brief.** Name the file.

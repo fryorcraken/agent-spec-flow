@@ -42,6 +42,55 @@ yourself goes back to the runner with the evidence attached.
   alternative.
 - **Never push your own branch to the remote.**
 
+## Signed commits
+
+Where the default branch requires signed commits
+(`gh api repos/<owner>/<repo>/branches/main/protection/required_signatures`
+reports `"enabled": true`; a 404 means it does not):
+
+- **Make every commit with `-S`** — the archive commit, and any commit a rebase
+  writes (`git rebase -S origin/main`).
+- **The earlier agents' commits may be unsigned.** The runner has asked the owner
+  to unlock the key before dispatching you, so signing is yours to finish.
+- **A commit that will not sign is a stop.** If a rebase is in progress, run
+  `git rebase --abort` first. Nothing is committed: report it to the runner, who
+  asks the owner to unlock the key. **Never `--no-gpg-sign`, never
+  `commit.gpgsign false`**, whatever the brief says.
+- **Before every push, Step 2's and Step 3's included, list what you are about
+  to push**: `git log --format="%G? %h %s" origin/main..HEAD`. Every line must
+  start with `G`. A line starting `N` is unsigned: sign it as below, or stop and
+  report. **Any other letter**: read
+  `gh api repos/<owner>/<repo>/commits/<sha>` and its `verification.reason`,
+  report what it says, and do not guess. A key GitHub knows can verify when the
+  local keyring cannot.
+- **A plain rebase of a branch already on `origin/main` writes nothing and signs
+  nothing.** It is not a way to sign.
+- **Re-signing is the only force-push besides the Step 2 rebase.** Do it only
+  when your brief contains the sentence below; without it, report the unsigned
+  commits and stop.
+
+  > The owner authorised the re-sign recovery.
+
+  **Run the listing once after Step 1, before Step 2.** When a line starts `N`
+  and the sentence is in your brief, run the recipe below: it rebases onto
+  `origin/main` too, so it takes the place of Step 2's rebase, and you carry on
+  at **Step 3**. A dispatch made only for the re-sign, after the archive is
+  already pushed, continues at Step 4. Run each as its own call:
+
+  ```
+  git fetch origin
+  git rev-parse HEAD
+  git rev-parse origin/piece/<name>
+  git rebase --force-rebase --gpg-sign origin/main
+  git diff <old HEAD> HEAD --stat
+  git push --force-with-lease=refs/heads/piece/<name>:<old remote tip> origin HEAD:refs/heads/piece/<name>
+  ```
+
+  `<old HEAD>` and `<old remote tip>` are the two values printed before the
+  rebase; they differ when the runner cherry-picked. The `git diff` prints
+  nothing unless the branch was behind `origin/main`, in which case it shows what
+  `main` gained, and none of the piece's own changes.
+
 ## Step 1 — is the piece finished?
 
 **The findings gate**, run from your own worktree:
@@ -56,6 +105,9 @@ grep -rc "^- \[" openspec/changes/<name>/findings/
 - **Every file must be non-zero in the second.** A file with zero boxes is a
   file the gate cannot see: report it to the runner, naming the file. Do not
   interpret it.
+- **A file whose only box is the ticked `none` verdict is a clean review**, not
+  a gap: accept it. **A `none` verdict beside any other box is an error**:
+  report the file to the runner.
 
 **The stage block** in `tasks.md`: every row ticked or struck through with a
 reason, except your own three. **Never tick a row on another agent's behalf.**
@@ -96,8 +148,8 @@ git push --force-with-lease origin HEAD:refs/heads/piece/<name>
 - **A conflict is yours to resolve.** Take neither side wholesale. **When the
   conflict is in a file your piece does not touch, stop and report** rather than
   guess. `git rebase --abort` returns the branch exactly as it was.
-- **If commit signing is required, a signing failure is a stop-and-ask.** Never
-  `--no-gpg-sign`, never `commit.gpgsign false`.
+- **If commit signing is required, follow "Signed commits".** A signing failure
+  is a stop-and-ask.
 
 After the rebase, **re-run the diff check**. Then carry on from where you were:
 on the forward pass that is **Step 3**; if you came here from Step 4 after
@@ -120,9 +172,9 @@ anything.** What follows is only what is specific to closing.
 - **Archive in merge order, oldest first**, if more than one change is waiting.
 
 Then `openspec validate --strict`, and commit to **your own branch** with named
-paths. **Say in the commit message that deleting `findings/` is the one real
-deletion**; the rest of the diff is the change folder moving into
-`changes/archive/<date>-<name>/`.
+paths (with `-S` where signatures are required). **Say in the commit message
+that deleting `findings/` is the one real deletion**; the rest of the diff is the
+change folder moving into `changes/archive/<date>-<name>/`.
 
 **Then push it**, each as its own call:
 
@@ -162,6 +214,12 @@ gh run watch <run-id> --exit-status
   while CI is running.
 - **An absent run is not a green one.** The overlay's `## CI gates` says what
   triggers each workflow.
+- **A PR that stays `BLOCKED` with every required check green is a stop.**
+  Report it. The first cause to check is an unsigned commit:
+  `git log --format="%G? %h %s" origin/main..origin/piece/<name>` (a line
+  starting `N`), or `gh api repos/<owner>/<repo>/commits/<sha>` and its
+  `verification.reason`. Name it in the report as a cause you checked, not a
+  guess.
 
 **When CI is red, you stop.** Report to the runner the run URL, the failed job,
 and the failing lines from its log. **Never fix the code to make it green.** You
@@ -194,7 +252,9 @@ gh pr view <n> --json title,body
   `gh api repos/<owner>/<repo>/branches/main/protection`.
 - **Bring the owner a merge-ready report** — findings gate clean, stage block
   complete, the stale-branch diff, the green run URL — **and merge on their
-  word**: `gh pr merge <n> --squash`.
+  word**: `gh pr merge <n> --squash`. `gh pr merge` is not allow-listed, so it
+  prompts the owner: expect the prompt, and say in your report that you are
+  waiting on it.
 - **If the owner has said in this session to merge on green without coming
   back**, that is the authority; do not ask again.
 - **`gh pr merge --delete-branch` exits 1 after a successful merge** when a local
@@ -210,7 +270,8 @@ gh pr view <n> --json title,body
 - **Tick a box for another agent** — a stage row or a finding.
 - **Re-open or re-argue a finding.**
 - **Force-push for any reason other than the Step 2 rebase**, which is
-  `--force-with-lease` onto current `main` and nothing else.
+  `--force-with-lease` onto current `main`, or the owner-authorised re-sign
+  under "Signed commits". Nothing else.
 - **Push to `main`.** Not the archive, not anything.
 - **Merge a PR whose diff you did not check**, however green the run.
 

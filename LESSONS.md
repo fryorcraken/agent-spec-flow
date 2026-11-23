@@ -131,6 +131,18 @@ Scanning for a reachable panic is a different reading of a file from scanning
 for a function doing two jobs. One agent holding both becomes whichever it
 started with.
 
+### Clean reviews the closer could not see
+**Rule:** [A review with no findings carries one box](skills/flow/SKILL.md#the-findings-files), issue #2
+
+v0.1.0's reviewers said to report clean areas "in prose, not as boxes", and the
+`closer` stopped on any findings file with zero boxes. A reviewer that found
+nothing and followed its own instructions wrote a file the gate always rejected.
+In dialectica it cost two extra reviewer dispatches (#173), each appending a
+`## Gate record` section with one ticked box, and once the `closer` merged anyway
+with four of six files box-less (#165), so the gate was not enforced. The gate
+exists because forty findings once read as done when written as headings, so it
+stays mechanical and the reviewers adapt: one ticked verdict box per clean file.
+
 ### The blind spec-test reviewer
 **Rule:** [`spec-test-reviewer` never reads the implementation](skills/flow/SKILL.md#the-roles)
 
@@ -273,6 +285,33 @@ pieces and none for its own, and stopped without pushing or opening the PR; the
 runner had to resume it. The narrow form the runner already used,
 `^branch\.piece/<name>`, still prefix-matches `piece/<name>-v2`, so the fix ends
 the pattern with `\.`: git prints each key as `branch.<name>.merge`.
+
+### Unsigned commits reaching the merge
+**Rule:** [Preflight 6](skills/run/SKILL.md#before-anything-preflight), [the `closer`'s "Signed commits"](agents/closer.md#signed-commits), and [a commit that will not sign does not stop you](skills/worktree-discipline/SKILL.md#committing-and-reporting); issues #4 and #8
+
+Two dialectica pieces (#200 and #201) reached the merge on a branch whose
+`main` requires signed commits, with every required check green and the PR
+`BLOCKED`. GPG's passphrase prompt cannot be answered by an agent, so the owner
+had authorised `git commit --no-gpg-sign` as a fallback. In #200, 19 of 23
+commits were unsigned; the runner's cherry-picks create new commits, and the
+fallback let unsigned ones through. In #201 the `closer` wrote two unsigned
+commits itself (the archive commit and a merge of `main`) after its gpg-agent
+cache had expired, because it runs longest and last. Both pieces needed a second
+dispatch or an owner round-trip to re-sign and force-push, and a full extra CI
+cycle. Nothing checked signing before the push, and v0.1.0 gave no way out
+short of overriding its own "never force-push". The fix checks before every push
+and documents the one recovery: `git rebase --force-rebase --gpg-sign`, because
+a plain rebase of a branch already on `main` writes no commit and signs nothing
+(measured), then a lease-pinned push to the piece ref, with the owner's say-so
+each time.
+
+The first version of the fix stopped the run at preflight, to have the owner
+unlock the key, and stopped any agent whose commit would not sign. The owner
+rejected that: a stop early in a piece costs the most, because every agent waits
+on it, while a stop at the end costs one round-trip. Now agents carry on
+unsigned (never by turning `commit.gpgsign` off), and the one wait is the
+runner's request to unlock the key just before the `closer`, which signs the
+whole branch in one pass.
 
 ### Checking out the piece branch
 **Rule:** [The piece push](skills/worktree-discipline/SKILL.md#the-piece-push-dev-writer-and-closer-only)
@@ -450,6 +489,37 @@ had to guess which scheme it used. Every stale checkout is a full copy of the
 repo, so a recursive grep hits each, and a citation from one reads like one from
 the real tree.
 
+### An allowlist that auto-approved GitHub writes
+**Rule:** [The `gh` rules are read-only on purpose](skills/init/SKILL.md#1-claudesettingsjson), and [`gh` writes prompt by design](skills/sync/SKILL.md#the-block); issue #17
+
+v0.1.0's `init` allowed `Bash(gh api *)` and `Bash(gh pr *)`. Neither is
+read-only: `gh api` accepts `-X PUT/PATCH/DELETE` (branch protection, repository
+settings) and `gh pr` covers merge and close. The overlay and the init skill both
+say specflow never changes a GitHub setting, but the allowlist would approve one
+with no prompt. Found reviewing a project set up with `/specflow:init`
+(basecamp-installer, PR 15), where a session applied branch protection with
+`gh api -X PUT` unprompted, under that rule, after the owner had asked for it.
+Allow rules cannot exclude flags, so the fix pairs `Bash(gh api *)` with deny
+rules on every flag that sets a method or a body. Tested 2026-11-21: a plain GET
+runs; `-X`, `-XGET`, `--method`, `--field`, `-f`, `-F` and `--input` are denied;
+`gh pr merge` and `gh pr close` are not allow-listed, so they prompt. **The first
+version of the deny rules leaked**: `-f ` and `-F ` ended in a space, so the
+attached form `-fper_page=1` (which pflag accepts, and which makes the call a
+POST) ran. An independent review caught it, and a rerun against the original
+rules confirmed it. The rules now match ` -f*` after a space and `-f*` right
+after `api`, so the attached form and the flag-first position are denied, while a
+branch name that merely contains `-f` (`fix-findings-tick`) still reads.
+
+### Project skills, commands and hooks that no worktree had
+**Rule:** [Track skills, commands and hooks](skills/init/SKILL.md#2-gitignore), and the [`project-overlay` spec](openspec/specs/project-overlay/spec.md); issue #19
+
+v0.1.0's `.gitignore` template ignored `.claude/*` and re-included only
+`settings.json`, `specflow/` and `agents/`, while the CLAUDE.md block describes
+project skills and hooks under `.claude/` as owner-managed content. An
+owner-approved project skill was therefore untracked, silently missing from every
+dispatched worktree (cut from `HEAD`) and from fresh clones, with no error: the
+same failure shape as the missing `baseRef`. Found in the same review.
+
 ## The project manager — `skills/pm/SKILL.md`
 
 ### PLAN.md
@@ -499,9 +569,11 @@ Kept here until they become issues on this repository.
    `--plugin-dir` development would then break. Kept inline.
 7. **`.gitignore` re-admits `.claude/specflow/`**, beyond decision 15's
    `settings.json`. The overlay must be tracked or no agent worktree has it.
-   `.claude/agents/` is re-admitted too, for project roles.
-8. **`Bash(gh repo view *)`** is in the base allowlist, beyond decision 15's list,
-   because every role derives the slug and default branch from it.
+   `.claude/agents/` is re-admitted too, for project roles, and since #19 so are
+   `skills/`, `commands/` and `hooks/`.
+8. **`Bash(gh repo view *)`** is in the base allowlist, beyond decision 15's
+   original list, because every role derives the slug and default branch from it.
+   Since #17 the `gh` rules are read-only forms (decision 15).
 9. **Not every harness build exposes `Grep` and `Glob` tools** (this extraction
    session had neither). The block's cost table names them as free.
 10. **The reviewer ceiling is six**, but `## Extra stages` can add reviewers.
