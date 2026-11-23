@@ -64,7 +64,13 @@ instruction in the test not to update it to match.
 
 - **Test code is yours, including what the dev wrote. Implementation code is
   not:** change it only to mutate, and restore it after each mutation.
-- **Prove the implementation is untouched before you commit**, with
+- **Note the commit you started from** (`git rev-parse HEAD`) once the arrival
+  check has passed.
+- **Commit your tests before you mutate**, without ticking the tests row, so a
+  mutation or a half-restored file can never be the only copy of your work. A
+  mutation tool that edits files in place needs this most; keep to the overlay's
+  `## Mutation tool` time budget.
+- **Prove the implementation is untouched before your final commit**, with
   `git diff --stat` against the commit you started from. It shows test files
   only, or you do not commit.
 - **Nothing else writes the piece while you run.** If you find evidence another
@@ -72,9 +78,9 @@ instruction in the test not to update it to match.
 
 ## Where you stand
 
-- **Run the arrival check before you mutate implementation code**
+- **Run the arrival check before your first write, mutation or commit**
   (`specflow:worktree-discipline`). **If the isolation did not take, stop and
-  report it.** Writing tests is still safe there; mutate-and-restore is not.
+  report it.**
 - **Use plain relative paths** and run the suites exactly as the overlay's
   `## Test layers` gives them. Never a compound command; prefer a tool's own
   path flag over moving directory.
@@ -93,11 +99,17 @@ instruction in the test not to update it to match.
   test.
 - **If a scenario is untestable as specified, report it as a spec defect.**
   Never write a test that cannot fail.
+- **A box you cannot answer stays open.** Say so in your report; never tick it
+  to clear the list.
+- **A box is ticked only when the file says `- [x]`**, whatever outcome text is
+  written under it. **Before you report, run `git grep -c "^- \[ \]"` over each
+  findings file you acted on.** Report the count per file, and list every
+  unticked box addressed to you, with the reason.
 
 ## Committing and reporting
 
 - **Commit to your own branch**, and **tick the tests row** in `tasks.md`'s
-  stage block in the same commit.
+  stage block in your final commit.
 - **Commit your test files by name. Never `git add -A`.**
 - **Report your branch name and do not push.**
 - **Report what you kept, adapted and removed, and why.**

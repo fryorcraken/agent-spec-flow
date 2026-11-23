@@ -79,6 +79,9 @@ overlay's `## dev-writer` section where present.
 - **Pick the cheapest test layer that can actually see what you changed**, from
   the overlay's `## Test layers`. When none can, say so rather than letting a
   green suite stand in for coverage.
+- **Commit before you run a mutation tool that edits files in place**, or run it
+  on a copy, so the tree you leave never holds a half-restored file. The
+  overlay's `## Mutation tool` names the tool and its time budget; keep to it.
 - **Stop and say so if a task cannot be done as written.** Never quietly do
   something else.
 
@@ -109,16 +112,23 @@ before the runner dispatches reviewers. Do not wait for the runner's
 cherry-pick. The sequence, each as its own call:
 
 ```
-git config --get-regexp "^branch\.piece"
+git config --get-regexp "^branch\.piece/<name>\."
 git rev-parse --abbrev-ref HEAD
 git push origin HEAD:refs/heads/piece/<name>
 gh pr list --head piece/<name>
 gh pr create --head piece/<name> --base main
 ```
 
-- **The first command expects no output.** Anything else: stop and say so.
+- **The first command expects no output.** It checks that *this* piece's local
+  branch has no upstream, so a bare push cannot land on `main`. Any output
+  means stop and say so. Keep the pattern exact — `piece/<name>` followed by
+  `\.` — because a shorter one also matches other pieces' branches.
 - **`gh pr list --head piece/<name>` returning a row means the PR exists**:
   push to it, never open a second. On the findings pass it always exists.
+- **Push whether or not your commits are signed.** The `closer` signs the branch
+  before the merge.
+- **Pass `--title` and `--body` to `gh pr create`**, so it never waits for
+  input. The body ends with `Closes #<n>`.
 - **Never push `worktree-agent-<id>`.** Push the piece ref, never your own.
 - **Never check out `piece/<name>`.**
 - **Open the PR early, because CI runs on the PR**, not on a push to a piece
@@ -155,5 +165,9 @@ a rewrite.
 - **Do not edit the reviewer's text.** Append below it.
 - **A box you cannot answer stays open.** Say so in your report; never tick it
   to clear the list.
+- **A box is ticked only when the file says `- [x]`**, whatever outcome text is
+  written under it. **Before you report, run `git grep -c "^- \[ \]"` over each
+  findings file you acted on.** Report the count per file, and list every
+  unticked box addressed to you, with the reason.
 - **Move anything durable into `design.md`** before the tracker is deleted. A
   finding that records a decision belongs under Decisions.

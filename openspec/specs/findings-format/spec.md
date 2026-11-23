@@ -8,7 +8,12 @@ Defines the reviewers' findings files: where they live, how each finding is writ
 
 ### Requirement: One findings file per reviewer dimension
 
-Each reviewer MUST write its findings to `openspec/changes/<name>/findings/<dimension>.md`, where `<dimension>` is one of `correctness`, `security`, `readability`, `architecture`, `spec-test` or `design-review`. A reviewer MUST write only its own file.
+Each reviewer MUST write its findings to `openspec/changes/<name>/findings/<dimension>.md`, where `<dimension>` is one of `correctness`, `security`, `readability`, `architecture`, `spec-test` or `design-review`. A reviewer MUST write only its own file; a `code-reviewer` instance given more than one dimension MUST write one file per dimension it was given. A reviewer MUST write its file even when it has no findings, including the `design-reviewer` for a change with no `design.md`.
+
+#### Scenario: A multi-dimension code reviewer
+
+- **WHEN** one `code-reviewer` instance is given correctness and security
+- **THEN** it writes `findings/correctness.md` and `findings/security.md`, and no other file
 
 #### Scenario: The design reviewer's file
 
@@ -30,6 +35,21 @@ A finding MUST NOT be written as a heading or as prose outside a checkbox.
 
 - **WHEN** a reviewer writes three findings
 - **THEN** `grep -c "^- \[ \]" findings/<dimension>.md` prints `3`
+
+### Requirement: A review with no findings carries one ticked verdict box
+
+A findings file with no findings MUST contain exactly one list item reading `- [x] **none** — no findings; clean areas described above`, preceded by prose naming the areas reviewed. A findings file with one or more findings MUST NOT contain it. The `closer` MUST treat a file whose only box is that item as answered.
+
+#### Scenario: A clean review passes the gate
+
+- **WHEN** a reviewer finds nothing and writes the verdict box
+- **THEN** `grep -c "^- \[ \]"` prints `0` and `grep -c "^- \["` prints `1` for the file
+- **AND** the `closer` does not stop on it
+
+#### Scenario: A clean review with no box
+
+- **WHEN** a reviewer finds nothing and writes only prose
+- **THEN** `grep -c "^- \["` prints `0` for the file and the `closer` stops and reports it
 
 ### Requirement: An outcome is appended, never edited in
 

@@ -188,9 +188,19 @@ directory before merge, once no box is empty.
 
 - **An unticked entry blocks the merge.** `grep -rn "^- \[ \]"` over the
   directory either returns lines or it does not.
+- **A box is ticked when the file says `- [x]`**, whatever outcome text sits
+  under it. A writer's report that a finding is ticked is a claim; the `grep` is
+  the check.
 - **The gate only sees checkboxes.** Before trusting an empty result, check
   every file has boxes at all: `grep -rc "^- \[" findings/` must be non-zero for
   each one.
+- **A review with no findings still carries one box**, ticked, on one line:
+
+  ```markdown
+  - [x] **none** — no findings; clean areas described above
+  ```
+
+  A file with findings carries no such box.
 - **Findings stay attributable.** A fixer that disagrees argues with the
   reviewer the entry names.
 - **Never relay a finding through a brief.** Name the file.
@@ -231,6 +241,10 @@ what Bash costs" — before its first shell command. Most often broken:
 - **A long output is not a reason to pipe.** Run it plain and read the whole
   thing.
 - **`gh` is free until you filter it.** No `--jq`; read the JSON.
+- **A dispatched agent never polls a background command's output** — with
+  `Monitor`, an `until` or `while` loop, or `tail` on the harness's task output
+  file. Run the long command in the foreground within a time limit, or abandon it
+  and say how far it got.
 - **`<producer> | grep -q` exits 141** when `grep -q` closes the pipe early and
   the producer dies of SIGPIPE. Use `[ "$(… | grep -c …)" -gt 0 ]`, which
   consumes all the output.

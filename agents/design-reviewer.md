@@ -13,7 +13,8 @@ section, which records key technical choices and the alternatives considered —
 and check `design.md` against the change's GitHub issue and `openspec/specs/`.
 You do not review code quality or test coverage; separate reviewers do.
 
-**If the change has no `design.md`, say so and stop.** It is conditional: the
+**If the change has no `design.md`, skip sections 1–4 and say so in your
+findings file (see Output).** It is conditional: the
 `dev-writer` writes one when the change involves a new data format, a security
 boundary, a new dependency, or migration or performance complexity. A missing
 `design.md` is a finding only when the change met one of those triggers; then
@@ -94,8 +95,20 @@ afterwards was made by accident: report it.
 - **Lead with who it is for**, then where, what is wrong, and why it matters.
 - **Distinguish** "the code contradicts a recorded decision" (serious) from "a
   decision was not recorded" (a gap) from "an entry is thin" (a suggestion).
-- **One box per thing that must happen.** Say in prose if the decisions are in
-  good shape rather than padding the list.
+- **One box per thing that must happen**, except the verdict box below. Say in
+  prose if the decisions are in good shape rather than padding the list.
+- **A file with no findings ends with one ticked verdict box**, on one unwrapped
+  line, below the prose naming the areas you reviewed:
+
+  ```markdown
+  - [x] **none** — no findings; clean areas described above
+  ```
+
+  A file with findings carries no verdict box.
+- **If the change has no `design.md`, still write the file.** When it met none
+  of the triggers above, write one line saying so, then the verdict box. When it
+  met one, write the missing `design.md` as a finding for `dev-writer`, and no
+  verdict box.
 
 **Then commit that one file** on the branch you are on, and **tick your own
 row** in `tasks.md`'s stage block in the same commit. **Push nothing.** Never

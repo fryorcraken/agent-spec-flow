@@ -103,7 +103,7 @@ analyser, not Bash itself.
 | a path the checker can resolve **before** the command runs | any path after `cd` |
 | `git diff origin/main -- <path>` to read an old version | materialising one to a scratch file first |
 | an allow-listed command — `git …`, `openspec …`, the project's own | the same with `--jq` or a pipe appended |
-| `gh api …`, `gh pr …`, `gh run …`, `gh issue …` | `sh <relative-path>` |
+| `gh` reads — `gh api <endpoint>`, `gh pr view/list/diff/checks`, `gh run list/view/watch`, `gh issue view/list` | `sh <relative-path>` |
 
 - **Never `cd <dir> && <command> <relative-path>`.** Use a path the checker can
   resolve against the cwd the command starts in:
@@ -118,9 +118,12 @@ analyser, not Bash itself.
   reaching **outside** the tree you are standing in.
 - **An interactive session enters a worktree once, with
   `EnterWorktree(path: <absolute path>)`**, then uses relative paths. Pass
-  `path`, never `name`: `name` creates a new worktree branched from
-  `origin/main`. **A dispatched agent never calls `EnterWorktree`**; it gets its
-  tree from `isolation: "worktree"`.
+  `path`, never `name`: `name` creates a *new* worktree, branched from
+  `origin/main` by default or from the current `HEAD` under
+  `worktree.baseRef: "head"`, which specflow requires. `HEAD` can be a stale
+  piece branch, so a `name` worktree can start from the wrong base while you
+  believe it is `origin/main`. **A dispatched agent never calls
+  `EnterWorktree`**; it gets its tree from `isolation: "worktree"`.
 - **Before sending an agent to a directory, check the directory is in scope.**
   An agent pointed outside every working directory stalls on every read.
 - **When you forbid a tool, name the replacement**: `Read` with
@@ -136,8 +139,16 @@ analyser, not Bash itself.
   or non-unique string, where `sed -i` exits 0 either way.
 - **`gh` is free until you filter it.** Run it plain and read the JSON; no
   `--jq`.
+- **`gh` writes are refused or prompt by design.** `gh api` with a method or body
+  flag is refused. `gh pr merge`, `close` and `comment` and every `gh issue`
+  write prompt. `gh pr create`, `gh pr edit` and `gh run rerun` are allowed. Do
+  not look for another way around a refusal or a prompt.
 - **A long output is not a reason to pipe.** Run it plain and read the whole
   thing.
+- **A dispatched agent never polls a background command's output** — with
+  `Monitor`, an `until` or `while` loop, or `tail` on the harness's task output
+  file. Run the long command in the foreground within a time limit, or abandon it
+  and say how far it got.
 - **`openspec` has no directory flag.** `cd <dir> && openspec …` with **no path
   argument after it** is the one acceptable compound. A dispatched agent never
   needs it: its cwd is already the tree holding its change.
@@ -171,7 +182,7 @@ analyser, not Bash itself.
 
   Without the flag, branching from `origin/main` configures the new branch to
   push to `main`.
-- **Check it with `git config --get-regexp "^branch\.<branch>"`, which returns
+- **Check it with `git config --get-regexp "^branch\.<branch>\."`, which returns
   nothing when the branch is right.** `git branch -vv` cannot tell: it prints
   `[origin/main]` either way.
 - **Push a `--no-track` branch by full refspec:**

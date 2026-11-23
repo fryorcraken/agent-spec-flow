@@ -33,6 +33,22 @@ unless it says warn.
 5. **You are an interactive main-loop session.** `ListAgents` and
    `ScheduleWakeup` must be available to you. A subagent has neither and must
    not run a piece.
+6. **Signed commits.** Read the repository facts, then whether the default
+   branch requires signatures, each as its own call:
+
+   ```
+   gh repo view --json nameWithOwner,defaultBranchRef
+   gh api repos/<owner>/<repo>/branches/main/protection/required_signatures
+   ```
+
+   Put the default branch's name from `defaultBranchRef` in place of `main`.
+   - **`"enabled": false`, or a 404 (the branch is unprotected):** signatures are
+     not required, unless the owner says a ruleset requires them; this endpoint
+     does not show rulesets. **A 403:** you cannot read it, so ask the owner.
+   - **`"enabled": true` means every commit must be signed before the merge,
+     not before the work.** **Do not stop and do not ask the owner anything
+     now.** Say once that work proceeds whether or not the key is unlocked, and
+     that you will ask the owner to unlock it just before the `closer`.
 
 ## What a runner does
 
@@ -51,15 +67,24 @@ worktree once its work is cherry-picked, and the reading below.
 1. **Read the issue**: `gh issue view $ARGUMENTS`. Pick `<name>`, a short
    kebab-case name for the change; the piece branch is `piece/<name>` and the
    OpenSpec change is `openspec/changes/<name>/`.
-2. **Check it is not already running**: `gh pr list --state open`,
-   `git worktree list`, `openspec list`. An existing `piece/<name>` or open PR
-   for this issue means resume it, not start another.
+2. **Check whether the piece already exists, or has finished**, each as its own
+   call: `gh issue view $ARGUMENTS --json state,closedByPullRequestsReferences`,
+   then `gh pr view <number> --json state,mergedAt,headRefName` for each PR it
+   lists (none is normal before the first `dev-writer` pass),
+   `gh pr list --state open`, `git worktree list`, `openspec list`.
+   - **A `MERGED` PR means the piece is finished: report that and stop.** Create
+     no worktree and dispatch nothing.
+   - **A `CLOSED` issue with no `MERGED` PR** — including a PR closed without
+     merging — **is the owner's decision.** Report it and ask; never start a
+     second piece over it.
+   - **An existing `piece/<name>` or an open PR for this issue means resume
+     it**, not start another.
 3. **Create the piece worktree** from the default branch, `--no-track`:
 
    ```
    git fetch origin
    git worktree add --no-track -b piece/<name> .claude/worktrees/piece-<name> origin/main
-   git config --get-regexp "^branch\.piece/<name>"
+   git config --get-regexp "^branch\.piece/<name>\."
    ```
 
    The last command must print nothing.
@@ -82,7 +107,7 @@ You read exactly enough to decide the next dispatch:
 |---|---|
 | `openspec/changes/<name>/tasks.md` — the `## Stages` block | which stage is next, and whether anyone is on it |
 | `git ls-files openspec/changes/<name>/findings/` — **the filenames** | whether a reviewer has reported, and which dimension |
-| `grep -rn "^- \[ \]"` over `findings/` | whether anything is unanswered, as a count |
+| `grep -rc "^- \[ \]"` over `findings/` | whether anything is unanswered, as a count per file |
 | the `closer`'s report | whether the piece closed, or what stopped it |
 
 - **Do not read the findings themselves, and never quote one into a brief.**
@@ -93,7 +118,18 @@ You read exactly enough to decide the next dispatch:
 ## Rebuild the state before you act on it
 
 Your memory of what you dispatched is not the source of truth. At the start of a
-session and after any gap, run each as its own call:
+session and after any gap, **first ask whether the piece is already finished**:
+
+```
+gh issue view $ARGUMENTS --json state,closedByPullRequestsReferences
+gh pr view <number> --json state,mergedAt,headRefName
+```
+
+Run the second for each PR the first lists, and skip it when none is listed.
+**A `MERGED` PR means the piece is finished: report that and stop.** Do not start
+the piece, do not dispatch, and schedule no further wakeup. A closed issue with no
+`MERGED` PR is the owner's decision: report it and ask. `gh pr list --state open`
+prints nothing about a merged piece. Otherwise run each as its own call:
 
 ```
 gh pr list --state open
@@ -111,14 +147,30 @@ grep -c "^## Stages" openspec/changes/<name>/tasks.md
 
 ## Is an agent still working?
 
-**`ListAgents`.** A piece with no agent in that list has no agent, whatever you
-remember. `Monitor` is the fallback if `ListAgents` is genuinely absent.
+**`ListAgents`.** A piece with no agent in that list has no *running* agent,
+whatever you remember. That is not the same as a finished stage. `Monitor` is the
+fallback if `ListAgents` is genuinely absent.
 
 - **One is running → `SendMessage` it.** Never start a second writer with
   `Agent`.
-- **None running, row unticked → dispatch.**
+- **`completed` is not done.** An agent shows `completed` once its turn has
+  ended, including while it waits on its own background work; the harness then
+  says it "has not reported yet". **Only a hand-back — the agent's final report,
+  delivered to you — ends a stage.**
+- **`completed` with no hand-back, or with the stage's output missing** (no PR
+  after a `dev-writer`'s first pass, no findings file after a reviewer), **means
+  resume it** with `SendMessage`. Do not dispatch the next stage, and **do not
+  remove its worktree**: it may hold uncommitted work.
+- **No agent listed, every earlier hand-back received, row unticked →
+  dispatch.**
 - **Either way, set a 5–10 minute `ScheduleWakeup` or `Monitor`.** A dispatched
   agent is silent until it finishes.
+- **A silent agent may be waiting on a permission prompt you cannot see.** Send
+  one status request with `SendMessage` after about 10 minutes of silence. If it
+  has not answered about 30 minutes after dispatch, **tell the owner plainly**:
+  which agent, and that a prompt may be waiting in their terminal. A blocked agent
+  cannot read your messages, so a further status request is not an action. Resume
+  or stop it on the owner's word.
 
 ## One piece is one PR
 
@@ -154,6 +206,14 @@ remember. `Monitor` is the fallback if `ListAgents` is genuinely absent.
 - **Keep `git -C`, `cd` and `EnterWorktree` out of briefs.**
 - **Do not phrase an instruction in a way that invites a chain.** Name a
   directory as its own step, or use the tool's own path flag.
+- **End every brief with this paragraph, for every agent type** — reviewers and
+  the `closer` included, not only the writers. The example briefs here omit it
+  for brevity:
+
+  > Shell rules: one plain command per call; no `cd … &&`, pipes, `;`, `$(…)` or
+  > `--jq`. Never poll a background command's output (`Monitor`, `until`, `tail`
+  > on a task file): run long commands in the foreground within a time limit, or
+  > abandon them and say how far they got.
 - **Ask for the branch name.** Every agent reports its harness-named branch.
 - **An agent that reports a fork point other than your HEAD, or files missing
   that the piece holds, means check `.claude/settings.json` for
@@ -165,8 +225,14 @@ remember. `Monitor` is the fallback if `ListAgents` is genuinely absent.
 - **Do not call `EnterWorktree` on an agent's behalf**, and do not put it in a
   brief.
 - **Cherry-pick before you dispatch the next writer.** The sequence per agent:
-  hand-back → cherry-pick its commits onto `piece/<name>` → remove its tree →
-  dispatch the next.
+  hand-back → cherry-pick its commits onto `piece/<name>` → check the boxes
+  (next bullet) → remove its tree → dispatch the next.
+- **After every hand-back that acted on findings, check the boxes yourself,
+  before you remove its tree.** Once its commits are cherry-picked, run
+  `grep -c "^- \[ \]" <file>…` over the findings files the report names, and
+  compare each count with the report's. **A box the report calls ticked but the
+  file shows as `- [ ]` goes back to the same writer** by `SendMessage`, naming
+  the file. Never dispatch the `closer` on a report's word.
 
 ### How many at once
 
@@ -195,7 +261,8 @@ A full review is six dispatches, one per stage-block row:
 ## Worktrees
 
 Create the piece worktree with `--no-track`, as in "Start the piece". Check a
-branch with `git config --get-regexp "^branch\.<name>"`, which must print
+branch with `git config --get-regexp "^branch\.<branch>\."` (`<branch>` is the
+full branch name, `piece/<name>` for a piece), which must print
 nothing; `git branch -vv` cannot tell. A `--no-track` branch is pushed by full
 refspec.
 
@@ -218,7 +285,32 @@ refspec.
 
 Dispatch `specflow:closer` when every review row is ticked or struck. It
 rebases if behind, archives, watches CI and merges. It decides nothing and
-dispatches nobody. Two things come back:
+dispatches nobody.
+
+**Where signatures are required** (preflight 6), this is the one place the
+piece waits on the owner for signing. Everything before it went ahead unsigned
+where the key was locked. `git fetch origin`, then list the commits GitHub will
+check, each as its own call:
+
+```
+git log --format="%G? %h %s" origin/main..origin/piece/<name>
+git log --format="%G? %h %s" origin/main..HEAD
+```
+
+- **Ask the owner to unlock their signing key, and wait for their word.** Say
+  how many lines start with `N` (unsigned). Do not dispatch the `closer` before
+  the owner confirms.
+- **Every line starting `G` needs nothing more.** The `closer` still signs its
+  own archive commit, so the key must be unlocked either way.
+- **Any other letter**: read `gh api repos/<owner>/<repo>/commits/<sha>` and its
+  `verification.reason` before acting. A key GitHub knows can still verify when
+  the local keyring cannot.
+- **When any line starts `N`, the owner's confirmation is the authority for the
+  re-sign.** Put the exact sentence `The owner authorised the re-sign recovery.`
+  in the `closer`'s brief; without it the `closer` reports the unsigned commits
+  and stops.
+
+Two things come back:
 
 **A red run.** Do not fix it yourself. Dispatch a fixer the ordinary way —
 `isolation: "worktree"`, its commits cherry-picked back. Nothing goes into the
@@ -238,6 +330,11 @@ it green.
 the finding names.
 
 A stale branch does not come back; the `closer` rebases it itself.
+
+**When the `closer` reports the PR merged, the piece is finished.** Check
+`gh pr view <number> --json state` rather than the report, tell the owner, and
+schedule no further wakeup. A later invocation for the same issue stops at "Start
+the piece".
 
 ## Lessons
 

@@ -80,8 +80,12 @@ arrival-check commands.
 ## Committing and reporting
 
 - **Before any git write, check the branch you are on has no upstream**:
-  `git config --get-regexp "^branch\.<your-branch>"` prints nothing. If it
+  `git config --get-regexp "^branch\.<your-branch>\."` prints nothing. If it
   prints a `merge` line, stop and say so.
+- **A commit that will not sign does not stop you.** Repeat that one commit with
+  `--no-gpg-sign`, carry on, and say in your hand-back that it is unsigned. The
+  `closer` signs the branch before the merge. **Never set `commit.gpgsign` to
+  false**, and never leave a commit out.
 - **Commit to your own branch**, the `worktree-agent-<id>` you are on.
 - **Commit named paths. Never `git add -A`.**
 - **Report the branch name** so the runner can cherry-pick it.
@@ -95,14 +99,18 @@ and git refuses (`fatal: 'piece/<name>' is already used by worktree at …`). Pu
 your tip to the remote piece ref by refspec instead:
 
 ```
-git config --get-regexp "^branch\.piece"
+git config --get-regexp "^branch\.piece/<name>\."
 git rev-parse --abbrev-ref HEAD
 git push origin HEAD:refs/heads/piece/<name>
 ```
 
 - **The `git config` check expects no output.** The piece branch is created with
-  `git worktree add --no-track`, so it has no upstream. `merge refs/heads/main`
-  coming back means it is configured to push to `main`: stop and say so.
+  `git worktree add --no-track`, so it has no upstream. Any output, such as
+  `merge refs/heads/main`, means it is configured to push to `main`: stop and
+  say so.
+- **Keep the pattern exact: `piece/<name>` followed by `\.`.** Branch config is
+  shared by every worktree, so a shorter pattern also matches other pieces'
+  branches and always prints output.
 - **`git branch -vv` is not the check.** It prints `[origin/main]` either way.
 - **`HEAD` on the left**, never `piece/<name>`: the local piece ref is the
   runner's and does not carry your commits.
@@ -124,6 +132,12 @@ git push origin HEAD:refs/heads/piece/<name>
 
 ## Handing the tree back
 
+- **Never end your turn with a command still running in the background.** The
+  harness then lists you `completed` while your work is unfinished and
+  uncommitted. Run long commands in the foreground within a time limit, or
+  abandon them and say how far they got.
+- **Hand back only when your work is committed.** Your final report is the
+  hand-back; nothing before it ends your stage.
 - **You cannot remove your own worktree** — `git worktree remove` refuses the
   directory you are in. That refusal is not a permissions problem.
 - **Removal is the runner's.** Your last act is to report your branch name and
