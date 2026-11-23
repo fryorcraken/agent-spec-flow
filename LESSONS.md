@@ -533,6 +533,19 @@ Every shell mutation needs a redirect, a heredoc or `-i`, exactly the shapes the
 checker cannot analyse, so the instruction turned auto-approved calls into
 prompts in the mode meant not to interrupt.
 
+### A block that described a different base than the one configured
+**Rule:** [Pass `path`, never `name`](skills/sync/SKILL.md#the-block), and [`worktree.baseRef: "head"`](skills/worktree-discipline/SKILL.md#worktreebaseref-head); issue #18
+
+dialectica's `CLAUDE.md` said `EnterWorktree(name)` creates a worktree "branched
+from `origin/main`", and that was true of its setup when written. The block
+carried that sentence into every project, but `/specflow:init` also writes
+`worktree.baseRef: "head"`, under which a `name` worktree forks from the local
+`HEAD`. An agent following the block could start from a stale piece branch or
+unmerged commits while believing it was on `origin/main`. Found reviewing a
+project set up with `/specflow:init` (basecamp-installer, PR 15). The block now
+states both bases and the reason `path` is the rule; `baseRef: "head"` stays,
+because every dispatched agent needs it to fork from the runner's `HEAD`.
+
 ### Forbidding a tool
 **Rule:** [When you forbid a tool, name the replacement](skills/sync/SKILL.md#the-block)
 
