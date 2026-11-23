@@ -191,7 +191,9 @@ gh pr view <n> --json title,body
   `gh api repos/<owner>/<repo>/branches/main/protection`.
 - **Bring the owner a merge-ready report** — findings gate clean, stage block
   complete, the stale-branch diff, the green run URL — **and merge on their
-  word**: `gh pr merge <n> --squash`.
+  word**: `gh pr merge <n> --squash`. `gh pr merge` is not allow-listed, so it
+  prompts the owner: expect the prompt, and say in your report that you are
+  waiting on it.
 - **If the owner has said in this session to merge on green without coming
   back**, that is the authority; do not ask again.
 - **`gh pr merge --delete-branch` exits 1 after a successful merge** when a local

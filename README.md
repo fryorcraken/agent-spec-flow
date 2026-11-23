@@ -54,7 +54,8 @@ Then, in the project's repository:
 ```
 
 This writes `.claude/settings.json` (`worktree.baseRef: "head"`, the marketplace
-entry, `enabledPlugins`, and a base allowlist for `git`, `gh` and `openspec`),
+entry, `enabledPlugins`, and a base allowlist for `git`, `gh` and `openspec` in which
+`gh` is read-only apart from creating and editing PRs and re-running a workflow),
 the `.gitignore` rules, the overlay skeleton `.claude/specflow/PROJECT.md`, and a
 version-stamped block in `CLAUDE.md`. It also runs `openspec init`. Afterwards:
 
