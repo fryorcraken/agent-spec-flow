@@ -165,6 +165,12 @@ fallback if `ListAgents` is genuinely absent.
   dispatch.**
 - **Either way, set a 5–10 minute `ScheduleWakeup` or `Monitor`.** A dispatched
   agent is silent until it finishes.
+- **A silent agent may be waiting on a permission prompt you cannot see.** Send
+  one status request with `SendMessage` after about 10 minutes of silence. If it
+  has not answered about 30 minutes after dispatch, **tell the owner plainly**:
+  which agent, and that a prompt may be waiting in their terminal. A blocked agent
+  cannot read your messages, so a further status request is not an action. Resume
+  or stop it on the owner's word.
 
 ## One piece is one PR
 
@@ -200,6 +206,14 @@ fallback if `ListAgents` is genuinely absent.
 - **Keep `git -C`, `cd` and `EnterWorktree` out of briefs.**
 - **Do not phrase an instruction in a way that invites a chain.** Name a
   directory as its own step, or use the tool's own path flag.
+- **End every brief with this paragraph, for every agent type** — reviewers and
+  the `closer` included, not only the writers. The example briefs here omit it
+  for brevity:
+
+  > Shell rules: one plain command per call; no `cd … &&`, pipes, `;`, `$(…)` or
+  > `--jq`. Never poll a background command's output (`Monitor`, `until`, `tail`
+  > on a task file): run long commands in the foreground within a time limit, or
+  > abandon them and say how far they got.
 - **Ask for the branch name.** Every agent reports its harness-named branch.
 - **An agent that reports a fork point other than your HEAD, or files missing
   that the piece holds, means check `.claude/settings.json` for
