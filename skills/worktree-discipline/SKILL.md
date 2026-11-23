@@ -82,6 +82,10 @@ arrival-check commands.
 - **Before any git write, check the branch you are on has no upstream**:
   `git config --get-regexp "^branch\.<your-branch>"` prints nothing. If it
   prints a `merge` line, stop and say so.
+- **A commit that will not sign does not stop you.** Repeat that one commit with
+  `--no-gpg-sign`, carry on, and say in your hand-back that it is unsigned. The
+  `closer` signs the branch before the merge. **Never set `commit.gpgsign` to
+  false**, and never leave a commit out.
 - **Commit to your own branch**, the `worktree-agent-<id>` you are on.
 - **Commit named paths. Never `git add -A`.**
 - **Report the branch name** so the runner can cherry-pick it.

@@ -33,6 +33,22 @@ unless it says warn.
 5. **You are an interactive main-loop session.** `ListAgents` and
    `ScheduleWakeup` must be available to you. A subagent has neither and must
    not run a piece.
+6. **Signed commits.** Read the repository facts, then whether the default
+   branch requires signatures, each as its own call:
+
+   ```
+   gh repo view --json nameWithOwner,defaultBranchRef
+   gh api repos/<owner>/<repo>/branches/main/protection/required_signatures
+   ```
+
+   Put the default branch's name from `defaultBranchRef` in place of `main`.
+   - **`"enabled": false`, or a 404 (the branch is unprotected):** signatures are
+     not required, unless the owner says a ruleset requires them; this endpoint
+     does not show rulesets. **A 403:** you cannot read it, so ask the owner.
+   - **`"enabled": true` means every commit must be signed before the merge,
+     not before the work.** **Do not stop and do not ask the owner anything
+     now.** Say once that work proceeds whether or not the key is unlocked, and
+     that you will ask the owner to unlock it just before the `closer`.
 
 ## What a runner does
 
@@ -215,7 +231,32 @@ refspec.
 
 Dispatch `specflow:closer` when every review row is ticked or struck. It
 rebases if behind, archives, watches CI and merges. It decides nothing and
-dispatches nobody. Two things come back:
+dispatches nobody.
+
+**Where signatures are required** (preflight 6), this is the one place the
+piece waits on the owner for signing. Everything before it went ahead unsigned
+where the key was locked. `git fetch origin`, then list the commits GitHub will
+check, each as its own call:
+
+```
+git log --format="%G? %h %s" origin/main..origin/piece/<name>
+git log --format="%G? %h %s" origin/main..HEAD
+```
+
+- **Ask the owner to unlock their signing key, and wait for their word.** Say
+  how many lines start with `N` (unsigned). Do not dispatch the `closer` before
+  the owner confirms.
+- **Every line starting `G` needs nothing more.** The `closer` still signs its
+  own archive commit, so the key must be unlocked either way.
+- **Any other letter**: read `gh api repos/<owner>/<repo>/commits/<sha>` and its
+  `verification.reason` before acting. A key GitHub knows can still verify when
+  the local keyring cannot.
+- **When any line starts `N`, the owner's confirmation is the authority for the
+  re-sign.** Put the exact sentence `The owner authorised the re-sign recovery.`
+  in the `closer`'s brief; without it the `closer` reports the unsigned commits
+  and stops.
+
+Two things come back:
 
 **A red run.** Do not fix it yourself. Dispatch a fixer the ordinary way —
 `isolation: "worktree"`, its commits cherry-picked back. Nothing goes into the
