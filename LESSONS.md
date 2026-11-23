@@ -470,6 +470,21 @@ check the skill never mentioned.
 The unticked-row grep returns nothing on a change with no block, which reads
 exactly like every row ticked. Changes predating the rule answered `0`.
 
+### An agent listed completed with its work unfinished
+**Rule:** [`completed` is not done](skills/run/SKILL.md#is-an-agent-still-working), [never end your turn with a command running](skills/worktree-discipline/SKILL.md#handing-the-tree-back), and the in-place mutation rule in [dev-writer](agents/dev-writer.md) and [tester](agents/tester.md); issue #13
+
+In dialectica #199 a `dev-writer` committed its first two commits, then started
+`cargo mutants --in-place` over `delivery.rs`, the main deliverable. In-place
+mutation rewrites the working tree, so the rewrite stayed uncommitted until the
+run restored the file. While it ran, the agent's turn ended: `ListAgents` showed
+it `completed` and the harness said it "has not reported yet: it is waiting on
+its own background work". That happened twice on the first pass. The branch held
+part of the work and there was no PR, and v0.1.0's "a piece with no agent in that
+list has no agent", read literally, said to dispatch the next stage. Removing the
+worktree would have destroyed the uncommitted rewrite. The runner resumed the
+agent with `SendMessage` and it finished. The overlay's "abandon a run past a
+couple of minutes" did not hold: agents ran mutations for five to eight.
+
 ## The `CLAUDE.md` block — `skills/sync/SKILL.md`
 
 ### The runner that rewrote the role files

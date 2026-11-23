@@ -132,6 +132,12 @@ git push origin HEAD:refs/heads/piece/<name>
 
 ## Handing the tree back
 
+- **Never end your turn with a command still running in the background.** The
+  harness then lists you `completed` while your work is unfinished and
+  uncommitted. Run long commands in the foreground within a time limit, or
+  abandon them and say how far they got.
+- **Hand back only when your work is committed.** Your final report is the
+  hand-back; nothing before it ends your stage.
 - **You cannot remove your own worktree** — `git worktree remove` refuses the
   directory you are in. That refusal is not a permissions problem.
 - **Removal is the runner's.** Your last act is to report your branch name and
