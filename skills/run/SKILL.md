@@ -49,6 +49,12 @@ unless it says warn.
      not before the work.** **Do not stop and do not ask the owner anything
      now.** Say once that work proceeds whether or not the key is unlocked, and
      that you will ask the owner to unlock it just before the `closer`.
+7. **The clone is yours.** Run `git worktree list`. **Warn, then continue,** if
+   it shows any worktree besides the one you stand in: name each, and say that
+   the runner manages worktrees in this clone as its own, removing them and
+   running `git worktree prune`, so a tree another tool or session manages here
+   can be lost. Recommend a separate clone for the runner. A `piece-<name>` tree
+   under `.claude/worktrees/` is another runner's piece, not a surprise.
 
 ## What a runner does
 
@@ -274,10 +280,9 @@ refspec.
   it.
 - **Run `git worktree list` at the end of each review round.** A tree with no
   open PR and no running agent is yours to remove, with
-  `git worktree remove <path>`.
-- **Remove only trees this flow created, each by path.** Never run a blanket
-  `git worktree prune`: it drops the registration of every worktree whose
-  directory is missing, including ones another tool manages.
+  `git worktree remove <path>`. `git worktree prune` clears entries whose
+  directories are gone. The clone is the runner's own (preflight 7), so both are
+  yours to run.
 - **Check merged-ness with `gh pr list`, not `git branch --merged`.** Pieces are
   squash-merged.
 

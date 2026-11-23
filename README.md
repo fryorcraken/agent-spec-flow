@@ -32,7 +32,9 @@ merge.
 
 ## Requirements
 
-- Claude Code, run from an interactive session.
+- Claude Code, run from an interactive session, in a clone of the repository
+  the runner can treat as its own: it creates, removes and prunes worktrees
+  there, and warns at the start when others already exist.
 - GitHub, with `gh` authenticated (`gh auth status`). Squash merge must be
   allowed.
 - The [OpenSpec CLI](https://openspec.dev) (`openspec --version`).
