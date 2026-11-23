@@ -45,14 +45,10 @@ unless it says warn.
    - **`"enabled": false`, or a 404 (the branch is unprotected):** signatures are
      not required, unless the owner says a ruleset requires them; this endpoint
      does not show rulesets. **A 403:** you cannot read it, so ask the owner.
-   - **`"enabled": true` means every commit in the piece must be signed.**
-     - Run `git config --get commit.gpgsign`. **If it does not print `true`,
-       stop** and tell the owner to turn signing on: otherwise every agent
-       commit is unsigned.
-     - **Tell the owner now to unlock their signing key**, so signing works
-       without a passphrase prompt for every agent and for the `closer`.
-     - Say that a commit that cannot be signed stops the run, and that no agent
-       works around it.
+   - **`"enabled": true` means every commit must be signed before the merge,
+     not before the work.** **Do not stop and do not ask the owner anything
+     now.** Say once that work proceeds whether or not the key is unlocked, and
+     that you will ask the owner to unlock it just before the `closer`.
 
 ## What a runner does
 
@@ -237,23 +233,28 @@ Dispatch `specflow:closer` when every review row is ticked or struck. It
 rebases if behind, archives, watches CI and merges. It decides nothing and
 dispatches nobody.
 
-**Before you dispatch it, where signatures are required** (preflight 6),
-`git fetch origin` and list the commits GitHub will check, each as its own call:
+**Where signatures are required** (preflight 6), this is the one place the
+piece waits on the owner for signing. Everything before it went ahead unsigned
+where the key was locked. `git fetch origin`, then list the commits GitHub will
+check, each as its own call:
 
 ```
 git log --format="%G? %h %s" origin/main..origin/piece/<name>
 git log --format="%G? %h %s" origin/main..HEAD
 ```
 
-- **Every line must start with `G`.** A line starting `N` is an unsigned commit.
-  **Do not dispatch the `closer`**: tell the owner which commits are unsigned and
-  ask whether to run the re-sign recovery.
+- **Ask the owner to unlock their signing key, and wait for their word.** Say
+  how many lines start with `N` (unsigned). Do not dispatch the `closer` before
+  the owner confirms.
+- **Every line starting `G` needs nothing more.** The `closer` still signs its
+  own archive commit, so the key must be unlocked either way.
 - **Any other letter**: read `gh api repos/<owner>/<repo>/commits/<sha>` and its
   `verification.reason` before acting. A key GitHub knows can still verify when
   the local keyring cannot.
-- **The re-sign recovery is a `closer` dispatch whose brief contains the exact
-  sentence** `The owner authorised the re-sign recovery.` Put it there only on
-  the owner's say-so.
+- **When any line starts `N`, the owner's confirmation is the authority for the
+  re-sign.** Put the exact sentence `The owner authorised the re-sign recovery.`
+  in the `closer`'s brief; without it the `closer` reports the unsigned commits
+  and stops.
 
 Two things come back:
 

@@ -50,14 +50,16 @@ reports `"enabled": true`; a 404 means it does not):
 
 - **Make every commit with `-S`** — the archive commit, and any commit a rebase
   writes (`git rebase -S origin/main`).
+- **The earlier agents' commits may be unsigned.** The runner has asked the owner
+  to unlock the key before dispatching you, so signing is yours to finish.
 - **A commit that will not sign is a stop.** If a rebase is in progress, run
   `git rebase --abort` first. Nothing is committed: report it to the runner, who
   asks the owner to unlock the key. **Never `--no-gpg-sign`, never
   `commit.gpgsign false`**, whatever the brief says.
 - **Before every push, Step 2's and Step 3's included, list what you are about
   to push**: `git log --format="%G? %h %s" origin/main..HEAD`. Every line must
-  start with `G`. A line starting `N` is unsigned: stop and report before
-  pushing. **Any other letter**: read
+  start with `G`. A line starting `N` is unsigned: sign it as below, or stop and
+  report. **Any other letter**: read
   `gh api repos/<owner>/<repo>/commits/<sha>` and its `verification.reason`,
   report what it says, and do not guess. A key GitHub knows can verify when the
   local keyring cannot.
@@ -69,8 +71,11 @@ reports `"enabled": true`; a 404 means it does not):
 
   > The owner authorised the re-sign recovery.
 
-  A dispatch made only for the re-sign starts here and continues at Step 4. Run
-  each as its own call:
+  **Run the listing once after Step 1, before Step 2.** When a line starts `N`
+  and the sentence is in your brief, run the recipe below: it rebases onto
+  `origin/main` too, so it takes the place of Step 2's rebase, and you carry on
+  at **Step 3**. A dispatch made only for the re-sign, after the archive is
+  already pushed, continues at Step 4. Run each as its own call:
 
   ```
   git fetch origin

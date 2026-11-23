@@ -263,7 +263,7 @@ branch was rejected by branch protection *for `refs/heads/main`*. `git branch
 not serve as the check.
 
 ### Unsigned commits reaching the merge
-**Rule:** [Preflight 6](skills/run/SKILL.md#before-anything-preflight), [the `closer`'s "Signed commits"](agents/closer.md#signed-commits), and [a commit that will not sign is a stop](skills/worktree-discipline/SKILL.md#committing-and-reporting); issues #4 and #8
+**Rule:** [Preflight 6](skills/run/SKILL.md#before-anything-preflight), [the `closer`'s "Signed commits"](agents/closer.md#signed-commits), and [a commit that will not sign does not stop you](skills/worktree-discipline/SKILL.md#committing-and-reporting); issues #4 and #8
 
 Two dialectica pieces (#200 and #201) reached the merge on a branch whose
 `main` requires signed commits, with every required check green and the PR
@@ -275,11 +275,19 @@ commits itself (the archive commit and a merge of `main`) after its gpg-agent
 cache had expired, because it runs longest and last. Both pieces needed a second
 dispatch or an owner round-trip to re-sign and force-push, and a full extra CI
 cycle. Nothing checked signing before the push, and v0.1.0 gave no way out
-short of overriding its own "never force-push". The fix prevents it (unlock the
-key first, never fall back, check before every push) and documents the one
-recovery: `git rebase --force-rebase --gpg-sign`, because a plain rebase of a
-branch already on `main` writes no commit and signs nothing (measured), then a
-lease-pinned push to the piece ref, with the owner's say-so each time.
+short of overriding its own "never force-push". The fix checks before every push
+and documents the one recovery: `git rebase --force-rebase --gpg-sign`, because
+a plain rebase of a branch already on `main` writes no commit and signs nothing
+(measured), then a lease-pinned push to the piece ref, with the owner's say-so
+each time.
+
+The first version of the fix stopped the run at preflight, to have the owner
+unlock the key, and stopped any agent whose commit would not sign. The owner
+rejected that: a stop early in a piece costs the most, because every agent waits
+on it, while a stop at the end costs one round-trip. Now agents carry on
+unsigned (never by turning `commit.gpgsign` off), and the one wait is the
+runner's request to unlock the key just before the `closer`, which signs the
+whole branch in one pass.
 
 ### Checking out the piece branch
 **Rule:** [The piece push](skills/worktree-discipline/SKILL.md#the-piece-push-dev-writer-and-closer-only)
