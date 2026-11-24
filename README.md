@@ -78,6 +78,28 @@ version-stamped block in `CLAUDE.md`. It also runs `openspec init`. Afterwards:
 | `/specflow:sync` | Rewrites the specflow block in `CLAUDE.md` for the installed version. The runner warns when the stamp is behind. |
 | `/specflow:init` | Sets up a repository, as above. |
 
+## Upgrading
+
+### To 0.1.1
+
+- **Run `/specflow:sync`** in each project. The `CLAUDE.md` block changed: never
+  poll a background command's output, `gh` writes prompt by design, both bases of
+  a `name` worktree, and the exact upstream-check pattern.
+- **Check `.claude/settings.json`.** `/specflow:init` no longer allows
+  `Bash(gh pr *)`, `Bash(gh issue *)` or `Bash(gh run *)`, and `gh api` is allowed
+  only as a GET. Re-running init reports broader rules an earlier init wrote but
+  leaves them; remove them yourself and add the deny rules listed in init's
+  step 1.
+- **Check `.gitignore`.** If you track project skills, commands or hooks, add
+  `!.claude/skills/`, `!.claude/commands/` and `!.claude/hooks/` after
+  `!.claude/agents/`. Re-running init appends any missing line.
+- **Where the default branch requires signed commits**, unlock your signing key
+  before `/specflow:run`; the runner now tells you, and no agent falls back to
+  `--no-gpg-sign`.
+- **Existing stage blocks and findings files stay valid.** A review with no
+  findings now ends with one ticked box, `- [x] **none** — no findings; clean
+  areas described above`; add it to any box-less file before the `closer` runs.
+
 ## Customising
 
 - **Project facts** live in the overlay, `.claude/specflow/PROJECT.md`. It may

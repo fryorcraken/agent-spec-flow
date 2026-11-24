@@ -10,7 +10,7 @@ You are the **runner** for the piece that implements issue **#$ARGUMENTS**.
 Every agent file is read by the agent it names; this skill is read by you, the
 session that dispatches them.
 
-**This is specflow v0.1.0.**
+**This is specflow v0.1.1.**
 
 ## Before anything: preflight
 
@@ -24,7 +24,7 @@ unless it says warn.
    exactly `TODO`, refuse to dispatch** and list the headings still holding one.
 3. **The `CLAUDE.md` block is current.** Read `CLAUDE.md` and find the line
    starting `<!-- specflow:begin v`. Absent → stop: the owner runs
-   `/specflow:sync`. **A stamp other than `v0.1.0` → warn the owner** that the
+   `/specflow:sync`. **A stamp other than `v0.1.1` → warn the owner** that the
    block and the installed plugin disagree and that `/specflow:sync` refreshes
    it, then continue.
 4. **`worktree.baseRef` is `"head"`.** Read `.claude/settings.json`. If the key
