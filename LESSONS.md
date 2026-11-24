@@ -552,6 +552,22 @@ because every dispatched agent needs it to fork from the runner's `HEAD`.
 Agents told "no Python" reached for `awk`, `sed` or a pipeline and stalled on the
 prompt those cause.
 
+### A blanket prune in a clone with other tools' worktrees
+**Rule:** [Preflight 7, the clone is yours](skills/run/SKILL.md#before-anything-preflight); issue #32, decision 30
+
+v0.1.0's runner skill said `git worktree prune` clears entries whose directories
+are gone. A blanket prune drops the registration of every such worktree, not only
+the runner's own, including one another tool manages. Harmless in a plain clone;
+reported as breaking for a repository whose worktrees are managed by another tool
+(herdr), where a directory can be briefly absent.
+
+The first fix forbade the blanket prune and had the runner remove only its own
+trees, each by path. The owner chose the other way: the runner is written for a
+clone it owns, where it can create, remove and prune worktrees freely without
+every cleanup rule hedging for trees it did not make. Preflight 7 lists any
+other worktree and warns without stopping, so the cost lands on whoever shares a
+clone, who is told to use a separate one.
+
 ### Worktrees under `tmp/`
 **Rule:** [Worktrees go in `.claude/worktrees/`](skills/sync/SKILL.md#the-block)
 
