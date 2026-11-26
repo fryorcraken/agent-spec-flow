@@ -326,6 +326,12 @@ unsigned (never by turning `commit.gpgsign` off), and the one wait is the
 runner's request to unlock the key just before the `closer`, which signs the
 whole branch in one pass.
 
+The wait was then asked unconditionally, so owners with the key already unlocked
+answered "Key unlocked? Yes or no." on every piece. The runner now tests signing
+itself (`git commit-tree -S` on the empty tree writes one unreferenced object
+and fails when the key is locked) and asks only when the test fails or when
+unsigned commits need the owner's re-sign authority.
+
 ### Checking out the piece branch
 **Rule:** [The piece push](skills/worktree-discipline/SKILL.md#the-piece-push-dev-writer-and-closer-only)
 
