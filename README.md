@@ -93,8 +93,9 @@ version-stamped block in `CLAUDE.md`. It also runs `openspec init`. Afterwards:
 - **Check `.gitignore`.** If you track project skills, commands or hooks, add
   `!.claude/skills/`, `!.claude/commands/` and `!.claude/hooks/` after
   `!.claude/agents/`. Re-running init appends any missing line.
-- **Where the default branch requires signed commits**, unlock your signing key
-  before `/specflow:run`; the runner now tells you, and no agent falls back to
+- **Where the default branch requires signed commits**, keep your signing key
+  unlocked by the time a piece reaches its `closer`; the runner tests signing
+  itself and asks you only when the key is locked, and no agent falls back to
   `--no-gpg-sign`.
 - **Existing stage blocks and findings files stay valid.** A review with no
   findings now ends with one ticked box, `- [x] **none** — no findings; clean

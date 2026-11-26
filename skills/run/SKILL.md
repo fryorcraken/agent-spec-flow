@@ -48,7 +48,8 @@ unless it says warn.
    - **`"enabled": true` means every commit must be signed before the merge,
      not before the work.** **Do not stop and do not ask the owner anything
      now.** Say once that work proceeds whether or not the key is unlocked, and
-     that you will ask the owner to unlock it just before the `closer`.
+     that you will test signing just before the `closer` and ask the owner only
+     if the test fails.
 7. **The clone is yours.** Run `git worktree list`. **Warn, then continue,** if
    it shows any worktree besides the one you stand in: name each, and say that
    the runner manages worktrees in this clone as its own, removing them and
@@ -302,18 +303,30 @@ git log --format="%G? %h %s" origin/main..origin/piece/<name>
 git log --format="%G? %h %s" origin/main..HEAD
 ```
 
-- **Ask the owner to unlock their signing key, and wait for their word.** Say
-  how many lines start with `N` (unsigned). Do not dispatch the `closer` before
-  the owner confirms.
+- **Test signing yourself; do not ask the owner whether the key is unlocked.**
+  Run this, which writes one unreferenced commit object, no ref and no file, and
+  fails when the key is locked:
+
+  ```
+  timeout 30 git commit-tree -S -m "signing probe" 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+  ```
+
+  (`4b825dc…` is git's empty tree.) **It prints a hash: the key is unlocked,
+  and you ask the owner nothing; dispatch the `closer`.** It fails or times out:
+  the key is locked. Only then say how many lines above start with `N`
+  (unsigned), ask the owner to unlock the key, and wait for their word before
+  you dispatch the `closer`. Never answer for the owner, and never run the probe
+  with `--no-gpg-sign` or after turning `commit.gpgsign` off.
 - **Every line starting `G` needs nothing more.** The `closer` still signs its
-  own archive commit, so the key must be unlocked either way.
+  own archive commit, so the probe above still runs either way.
 - **Any other letter**: read `gh api repos/<owner>/<repo>/commits/<sha>` and its
   `verification.reason` before acting. A key GitHub knows can still verify when
   the local keyring cannot.
 - **When any line starts `N`, the owner's confirmation is the authority for the
-  re-sign.** Put the exact sentence `The owner authorised the re-sign recovery.`
-  in the `closer`'s brief; without it the `closer` reports the unsigned commits
-  and stops.
+  re-sign,** so a passing probe is not enough: ask the owner once, naming the
+  unsigned commits, and wait for their word. Put the exact sentence
+  `The owner authorised the re-sign recovery.` in the `closer`'s brief; without
+  it the `closer` reports the unsigned commits and stops.
 
 Two things come back:
 
